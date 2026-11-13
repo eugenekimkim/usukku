@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>우수꾸 · 디자인 시안 (about)</title>
+<link rel="stylesheet" href="../fonts/suite.css">
+<link rel="stylesheet" href="../css/tokens.css">
+<link rel="stylesheet" href="../css/gallery.css">
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="eyebrow">디자인 시안 · 2026.11</span>
+    <h1>우수꾸</h1>
+    <p class="lead">우리 수영장 꾸미자. 워치로 잰 그날의 수영 기록이 캐릭터 아이템이 되고, 같은 수영장 사람들과 함께 리프를 키우는 수영 앱이에요.</p>
+    <div class="meta">
+      <span class="chip">타겟: 수영장 다니는 2030</span>
+      <span class="chip">애플워치 · 갤럭시워치 연동</span>
+      <span class="chip">화면 13개 · 피그마 스타일 규칙 그대로 HTML/CSS로 구현</span>
+      <a class="to-app" href="../index.html">앱 실행하기 →</a>
+    </div>
+  </div>
+</header>
+
+<nav class="toc" aria-label="목차">
+  <div class="wrap">
+    <a href="#onboarding">시작 · 가입</a>
+    <a href="#main">메인 탭</a>
+    <a href="#mypool">MY POOL</a>
+    <a href="#more">메뉴 · 공지</a>
+    <a href="#characters">캐릭터</a>
+    <a href="#system">디자인 시스템</a>
+  </div>
+</nav>
+
+<main class="wrap">
+  <section id="onboarding">
+    <h2>시작 · 가입</h2>
+    <p class="desc">물이 무서운 동물 친구들이 수영장에 등록했다는 세계관으로 시작해요. 캐릭터를 고르고, 위치로 내가 다니는 수영장을 정하면 준비 끝.</p>
+    <div class="row" data-screens="00-0:스플래시:그라디언트 배경 위 로고와 다섯 친구|00-0b:인트로 · 로그인:수영장 가장자리에서 머뭇거리는 친구들|00:캐릭터 선택:다섯 친구 중 고르고 털 색, 이름 정하기|00-2:수영장 선택:위치 기반 지도, 우수꾸 멤버 수 표시"></div>
+  </section>
+
+  <section id="main">
+    <h2>메인 탭</h2>
+    <p class="desc">수영을 마치고 워치가 동기화되면 오늘의 상자가 도착해요. 영법은 아이템 테마(자유형 물고기 · 평영 바다거북 · 배영 해달 · 접영 고래), 거리는 상자 등급, 효율 향상은 반짝이 등급이 돼요. 화면 아래 탭을 누르면 해당 화면으로 이동해요. 실제로 눌러보려면 위의 앱 실행하기를 눌러 주세요.</p>
+    <div class="row" data-screens="01:오늘의 상자:오늘 기록 요약과 상자 속 아이템|02:꾸미기:수모 · 수경 · 수영복, 바다 친구가 줄지어 따라오기|03:우리 수영장:공동 리프, 수영장 대결, 강습반 팀 목표|05:바다 도감:못 만난 친구는 실루엣과 획득 힌트|06:마이페이지:누적 기록과 킥판 졸업 진행도"></div>
+  </section>
+
+  <section id="mypool">
+    <h2>MY POOL</h2>
+    <p class="desc">싸이월드 미니룸처럼 나만의 수영장을 꾸며요. 옆에서 보기로 바꾸면 캐릭터가 레인을 왕복하고, 바닥에는 내가 꾸민 산호와 조개가 놓여 있어요. (옆에서 보기는 실제로 왕복하는 모습을 재생해요)</p>
+    <div class="row" data-screens="04:MY POOL · 위에서:방문자 카운터, 오늘의 한마디, 물방울 쪽지, 파도타기|04-2:MY POOL · 옆에서:레인 왕복 루프 영상과 오늘 풀에 생긴 일"></div>
+  </section>
+
+  <section id="more">
+    <h2>메뉴 · 공지</h2>
+    <p class="desc">육지 동물들이 수영을 배우는 설정이라, 안내와 공지는 바다 동물인 물개 코치가 맡아요.</p>
+    <div class="row" data-screens="07:전체 메뉴:주요 기능 바로가기와 소식 · 함께 · 도움|08:공지사항:물개 코치 배너와 태그로 구분한 공지"></div>
+  </section>
+
+  <section id="characters">
+    <h2>캐릭터</h2>
+    <p class="desc">하찮은 귀여움이 핵심이에요. 볼살이 튀어나온 얼굴, 바깥에만 있는 선, 정수리에 젖어서 뻗친 털 몇 가닥, 숨 참는 "음파" 표정이 공통 규칙이에요.</p>
+    <div class="sheet" id="animalSheet"></div>
+    <h3 class="sub-h">친구들의 수영 고민</h3>
+    <div class="cards" id="quirks"></div>
+    <h3 class="sub-h">바다 친구 · 영법별 보상</h3>
+    <div class="sheet" id="seaSheet"></div>
+  </section>
+
+  <section id="system">
+    <h2>디자인 시스템</h2>
+    <p class="desc">배경과 수영장은 하늘색, 버튼과 진행은 블루, 포인트와 한정 태그는 핑크. 레퍼런스 그라디언트는 상자 · 무지개 등급 · 스플래시처럼 특별한 순간에만 써요.</p>
+    <h3 class="sub-h">컬러</h3>
+    <div class="palette" id="palette"></div>
+    <h3 class="sub-h">텍스트 스타일 · SUITE, 자간 -2.5%</h3>
+    <div class="type" id="typeScale"></div>
+    <h3 class="sub-h">핵심 규칙</h3>
+    <div class="cards">
+      <div class="card"><h4>오늘의 상자</h4><p>수영 후 워치가 동기화되면 도착. 거리 구간은 상자 등급, 시간대와 날씨는 한정 아이템.</p></div>
+      <div class="card"><h4>주간 연속 기록</h4><p>매일이 아니라 "주 2회 유지" 단위로 보상해서, 쉬는 날에도 지치지 않게.</p></div>
+      <div class="card"><h4>킥판 졸업</h4><p>기록이 쌓이면 킥판 · 튜브를 하나씩 졸업. 실제 실력 향상과 캐릭터 이야기가 겹쳐요.</p></div>
+      <div class="card"><h4>수영장 · 강습반</h4><p>같은 수영장끼리 공동 리프를 키우고, 강습반 팀으로 목표 거리를 함께 채워요.</p></div>
+    </div>
+  </section>
+</main>
+
+<footer><div class="wrap">우수꾸(가제) 디자인 시안 · 피그마 원본의 오토레이아웃 · 텍스트 스타일 · 컬러 값을 그대로 옮긴 HTML/CSS · 폰트 SUITE (SIL OFL 1.1)</div></footer>
+
+<div class="lb" id="lb" role="dialog" aria-modal="true" aria-label="화면 크게 보기">
+  <button class="lb-close" id="lbClose" type="button">닫기 ✕</button>
+  <button class="lb-nav prev" id="lbPrev" type="button" aria-label="이전 화면">‹</button>
+  <div class="lb-stage" id="lbStage"></div>
+  <button class="lb-nav next" id="lbNext" type="button" aria-label="다음 화면">›</button>
+  <div class="lb-cap" id="lbCap"></div>
+</div>
+
+<script src="../js/art.js"></script>
+<script src="../js/props.js"></script>
+<script src="../js/screens.js"></script>
+<script src="../js/gallery.js"></script>
+</body>
+</html>

@@ -65,10 +65,6 @@
 <path d="M175 46 301 120 175 194 49 120z" fill="#7CC4FF"/><path d="M175 46 301 120 175 194 49 120z" fill="none" stroke="#FFFFFF" stroke-width="5" stroke-linejoin="round"/>
 <path d="M98 116c7-4 14-4 21 0s14 4 21 0M198 146c7-4 14-4 21 0s14 4 21 0M160 76c6-3 12-3 18 0" stroke="#FFFFFF" stroke-opacity=".75" stroke-width="2.5" fill="none" stroke-linecap="round"/>
 <path d="M232 104c0 3-4 5-8 5s-7-2-7-5 3-5 7-5 8 2 8 5zM231 104l6-4v8z" fill="#2F7FE0"/><path d="M126 150c0 2.5-3 4-6 4s-5-1.5-5-4 2-4 5-4 6 1.5 6 4zM125 150l5-3v6z" fill="#2F7FE0"/>
-<ellipse cx="166" cy="96" rx="5.5" ry="14" fill="#FFFFFF" transform="rotate(-12 166 96)"/><ellipse cx="166" cy="97" rx="2.5" ry="9" fill="#FF9EB5" transform="rotate(-12 166 97)"/><ellipse cx="184" cy="96" rx="5.5" ry="14" fill="#FFFFFF" transform="rotate(12 184 96)"/><ellipse cx="184" cy="97" rx="2.5" ry="9" fill="#FF9EB5" transform="rotate(12 184 97)"/>
-<circle cx="175" cy="124" r="19" fill="#FFFFFF"/><rect x="156" y="115" width="38" height="3.5" rx="1.75" fill="#FF7A6B"/><circle cx="167" cy="117" r="4.5" fill="#3ED3C9" stroke="#FF7A6B" stroke-width="2"/><circle cx="183" cy="117" r="4.5" fill="#3ED3C9" stroke="#FF7A6B" stroke-width="2"/>
-<circle cx="167" cy="126" r="2.2" fill="#5A2A36"/><circle cx="183" cy="126" r="2.2" fill="#5A2A36"/><path d="M173.5 129.5l1.5 1.5 1.5-1.5z" fill="#FF7A8F"/><ellipse cx="161" cy="131" rx="3" ry="2" fill="#FF8C8C" fill-opacity=".5"/><ellipse cx="189" cy="131" rx="3" ry="2" fill="#FF8C8C" fill-opacity=".5"/>
-<path d="M152 137c8-4 15-4 23 0s15 4 23 0" stroke="#FFFFFF" stroke-width="3" fill="none" stroke-linecap="round"/>
 <circle cx="250" cy="150" r="10" fill="#FFFFFF"/><path d="M240 150a10 10 0 0 1 20 0z" fill="#FF7A6B"/><path d="M250 140v20" stroke="#FFC94A" stroke-width="3"/>
 <path d="M174 36c-4-8 4-14 0-22M182 38c-3-7 3-11 0-18" stroke="#3FA65A" stroke-width="4" stroke-linecap="round" fill="none"/>
 <path d="M300 122V96M300 108c6-3 9-8 9-14M300 112c-6-2-9-6-9-12" stroke="#FFB547" stroke-width="5" stroke-linecap="round" fill="none"/>
@@ -115,7 +111,13 @@ ${weed(40)}${branch(78, '#FF9EC4', 34)}${weed(128)}${shell(168, '#FFD978')}${she
     let wave = 'M0 250'; for (let x = 0; x < 390; x += 39) wave += ' q19.5 -8 39 0';
     scene.introPool = `<svg viewBox="0 0 390 360" xmlns="http://www.w3.org/2000/svg"><rect y="214" width="390" height="40" fill="#F6E3B4"/><path d="M0 214h390" stroke="#E7CF95" stroke-width="3"/><path d="${wave} V360 H0Z" fill="#7CC4FF"/><path d="M40 290c10-5 20-5 30 0s20 5 30 0M250 312c10-5 20-5 30 0s20 5 30 0M160 334c8-4 16-4 24 0" stroke="#FFFFFF" stroke-opacity=".7" stroke-width="3" fill="none" stroke-linecap="round"/><circle cx="330" cy="268" r="4" fill="none" stroke="#FFFFFF" stroke-width="2"/><circle cx="340" cy="254" r="2.5" fill="#FFFFFF"/></svg>`;
   }
-  scene.bubbles = `<svg viewBox="0 0 60 30" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="20" r="6" fill="none" stroke="#FFFFFF" stroke-width="2.4"/><circle cx="28" cy="10" r="4" fill="none" stroke="#FFFFFF" stroke-width="2"/><circle cx="40" cy="22" r="2.6" fill="#FFFFFF"/></svg>`;
+  // 수영장 위 물결 (캐릭터 앞에 겹침)
+  scene.ripple = `<svg viewBox="0 0 60 14" xmlns="http://www.w3.org/2000/svg"><path d="M4 7c8-4 15-4 23 0s15 4 23 0" stroke="#FFFFFF" stroke-width="3" fill="none" stroke-linecap="round"/></svg>`;
+  // 꾸미기 아이템 아이콘 (수경 · 수영복 · 오리발)
+  item.goggle = (c) => `<svg viewBox="0 0 48 40" xmlns="http://www.w3.org/2000/svg"><path d="M4 20h40" stroke="${c}" stroke-width="4" stroke-linecap="round"/><circle cx="16" cy="20" r="9" fill="#3ED3C9" stroke="${c}" stroke-width="4"/><circle cx="32" cy="20" r="9" fill="#3ED3C9" stroke="${c}" stroke-width="4"/><path d="M12 16c2-2 4-2 6-1" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"/></svg>`;
+  item.suit = (c, s = '#FFFFFF') => `<svg viewBox="0 0 48 40" xmlns="http://www.w3.org/2000/svg"><path d="M14 4h6c0 6 2 9 4 9s4-3 4-9h6v14c0 10-6 18-10 18s-10-8-10-18z" fill="${c}"/><path d="M15 20h18M16 27h16" stroke="${s}" stroke-width="3"/></svg>`;
+  item.fin = (c) => `<svg viewBox="0 0 48 40" xmlns="http://www.w3.org/2000/svg"><path d="M10 6c4-2 8-2 10 2l-2 26c-4 4-12 4-14 0z" fill="${c}"/><path d="M28 8c4-2 8-2 10 2l-2 26c-4 4-12 4-14 0z" fill="${c}" opacity=".85"/></svg>`;
+  scene.bubbles =`<svg viewBox="0 0 60 30" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="20" r="6" fill="none" stroke="#FFFFFF" stroke-width="2.4"/><circle cx="28" cy="10" r="4" fill="none" stroke="#FFFFFF" stroke-width="2"/><circle cx="40" cy="22" r="2.6" fill="#FFFFFF"/></svg>`;
 
   window.PROPS = { tab, icon, menu, item, scene };
 })();

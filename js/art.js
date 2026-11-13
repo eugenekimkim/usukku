@@ -26,7 +26,7 @@
     for (let i = 0; i < n; i++) { const a = (i / n) * Math.PI * 2 - Math.PI / 2; const cx = 60 + 43 * Math.cos(a), cy = 78 + 35 * Math.sin(a); const r = (Math.sin(a) > 0.6) ? 11 : 13.5; s += `<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="${r}"/>`; }
     return s + `<ellipse cx="60" cy="78" rx="44" ry="36"/>`;
   }
-  function sheep(F, puff) {
+  function sheep(F, puff, opts = {}) {
     const FACE = '#FFE2CC';
     const FN = 'M60 56C77 56 86 66 86 77C86 83 92 87 92 95C92 104 79 110 60 110C41 110 28 104 28 95C28 87 34 83 34 77C34 66 43 56 60 56Z';
     const FP = 'M60 56C77 56 86 66 86 75C86 81 96 86 96 95C96 105 80 111 60 111C40 111 24 105 24 95C24 86 34 81 34 75C34 66 43 56 60 56Z';
@@ -37,14 +37,15 @@
     const ears = `<ellipse cx="5" cy="90" rx="14" ry="6.5" transform="rotate(62 5 90)"/><ellipse cx="115" cy="90" rx="14" ry="6.5" transform="rotate(-62 115 90)"/>`;
     const head = woolRing();
     const floatSil = `<rect x="26" y="112" width="16" height="13" rx="6" transform="rotate(42 34 118.5)"/><rect x="78" y="112" width="16" height="13" rx="6" transform="rotate(-42 86 118.5)"/>`;
-    const sil = legs + body + bridge + arms + head + ears + floatSil;
-    const pass = (c, w) => `<g fill="${c}" stroke="${c}" stroke-width="${w}" stroke-linejoin="round">${sil}</g><path d="${TUFT}" fill="none" stroke="${c}" stroke-width="${3 + w}" stroke-linecap="round"/>`;
+    const capSil = opts.cap ? `<path d="${CAP_PATH}"/>` : '';
+    const sil = legs + body + bridge + arms + head + capSil + ears + floatSil;
+    const pass = (c, w) => `<g fill="${c}" stroke="${c}" stroke-width="${w}" stroke-linejoin="round">${sil}</g>` + (opts.cap ? '' : `<path d="${TUFT}" fill="none" stroke="${c}" stroke-width="${3 + w}" stroke-linecap="round"/>`);
     const fur = (s) => `<g fill="${F}">${s}</g>`;
     const bl = puff ? [30, 90, 11, 7] : [33, 87, 7.5, 5.5];
-    const fill = fur(legs + body + bridge + arms) + `<path d="${TUFT}" fill="none" stroke="${F}" stroke-width="3" stroke-linecap="round"/>` + fur(head)
+    const fill = fur(legs + body + bridge + arms) + (opts.cap ? '' : `<path d="${TUFT}" fill="none" stroke="${F}" stroke-width="3" stroke-linecap="round"/>`) + fur(head) + capFill(opts.cap)
       + `<path d="${puff ? FP : FN}" fill="${FACE}"/>`
       + `<g fill="${FACE}">${ears}</g><ellipse cx="6" cy="92" rx="8" ry="3" fill="#FFB8B8" transform="rotate(62 6 92)"/><ellipse cx="114" cy="92" rx="8" ry="3" fill="#FFB8B8" transform="rotate(-62 114 92)"/>`
-      + goggles('#FFB547', 50)
+      + goggles(opts.goggle || '#FFB547', 50)
       + `<ellipse cx="${bl[0]}" cy="94" rx="${bl[2]}" ry="${bl[3]}" fill="#FF9E9E" fill-opacity=".75"/><ellipse cx="${bl[1]}" cy="94" rx="${bl[2]}" ry="${bl[3]}" fill="#FF9E9E" fill-opacity=".75"/>`
       + (puff ? `<path d="M42 86c2.3-1.8 5.7-1.8 8 0M70 86c2.3-1.8 5.7-1.8 8 0" stroke="${INK}" stroke-width="2.2" fill="none" stroke-linecap="round"/><ellipse cx="60" cy="94" rx="2.2" ry="1.6" fill="${INK}"/>`
         : `<ellipse cx="46.5" cy="85" rx="1.9" ry="2.4" fill="${INK}"/><ellipse cx="73.5" cy="85" rx="1.9" ry="2.4" fill="${INK}"/><ellipse cx="60" cy="90.5" rx="2.2" ry="1.6" fill="#FF8C8C"/><path d="M55.5 93.5c1.5 2 3 2 4.5 0 1.5 2 3 2 4.5 0" stroke="${INK}" stroke-width="2" fill="none" stroke-linecap="round"/>`)
@@ -54,11 +55,24 @@
     return wrap(SHADOW + pass('#FFFFFF', 11) + pass(LINE, 4.6) + fill + d + b);
   }
 
-  // kind: rabbit | hamster | bear | cat | sheep, fur: 'default' | 'white', expr: 'normal' | 'puff'
-  function animal(kind, fur = 'default', expr = 'normal') {
-    const F = fur === 'white' ? FUR.white : FUR[kind];
+  // 수모 (opts.cap = { color, deco })
+  const CAP_PATH = 'M19 68C19 42 36 30 60 30s41 12 41 38z';
+  function capFill(cap) {
+    if (!cap) return '';
+    const deco = { dots: '<circle cx="44" cy="44" r="3.4" fill="#FFFFFF"/><circle cx="62" cy="38" r="3.4" fill="#FFFFFF"/><circle cx="78" cy="48" r="3.4" fill="#FFFFFF"/><circle cx="56" cy="54" r="3" fill="#FFFFFF"/>',
+      rainbow: '<path d="M30 66c0-18 13-30 30-30s30 12 30 30" stroke="#FFC94A" stroke-width="5" fill="none"/><path d="M40 66c0-12 9-21 20-21s20 9 20 21" stroke="#3ED3C9" stroke-width="5" fill="none"/>',
+      whale: '<path d="M46 50c0-4 5-7 11-7s11 3 11 7-5 6-11 6-11-2-11-6z" fill="#FFFFFF"/><path d="M66 49c2-4 5-5 6-4-1 2-2 3-3 4 1 1 3 2 3 4-1 1-4 0-6-4z" fill="#FFFFFF"/>',
+      team: '<path d="M42 54h36" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round"/><path d="M52 44l8-7 8 7" stroke="#FFFFFF" stroke-width="3.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
+      sun: '<circle cx="60" cy="50" r="8" fill="#FFFFFF"/>' }[cap.deco] || '';
+    return `<path d="${CAP_PATH}" fill="${cap.color}"/>${deco}<path d="M20 64h80" stroke="#0F2A43" stroke-opacity=".12" stroke-width="6" stroke-linecap="round"/>`;
+  }
+
+  // kind: rabbit | hamster | bear | cat | sheep, fur: 'default' | 'white' | '#hex', expr: 'normal' | 'puff'
+  // opts: { cap: { color, deco }, goggle: '#hex' }
+  function animal(kind, fur = 'default', expr = 'normal', opts = {}) {
+    const F = fur === 'white' ? FUR.white : (fur && fur[0] === '#' ? fur : FUR[kind]);
     const puff = expr === 'puff';
-    if (kind === 'sheep') return sheep(F, puff);
+    if (kind === 'sheep') return sheep(F, puff, opts);
     const legs = `<ellipse cx="49" cy="156" rx="8.5" ry="7.5"/><ellipse cx="71" cy="156" rx="8.5" ry="7.5"/>`;
     const body = `<ellipse cx="60" cy="132" rx="24" ry="25"/>`;
     const bridge = `<ellipse cx="60" cy="114" rx="28" ry="10"/>`;
@@ -95,14 +109,16 @@
       frontFill = `<ellipse cx="60" cy="138" rx="33" ry="9.5" fill="#FFC94A"/><path d="M36 136l5 8M52 129l2 11M70 129l-1 11M84 136l-5 8" stroke="#FF7A6B" stroke-width="5"/>`;
       extra = (puff ? '' : `<path d="M58 90l2 2 2-2z" fill="#FF7A8F"/>`) + `<path d="M${puff ? 17 : 22} 90l-10-2M${puff ? 17 : 22} 95l-10 1M${puff ? 103 : 98} 90l10-2M${puff ? 103 : 98} 95l10 1" stroke="${INK}" stroke-width="1.6" stroke-linecap="round" stroke-opacity=".7"/>`;
     }
-    const sil = legs + body + bridge + arms + ears + head + frontSil;
-    const pass = (col, w) => `<g fill="${col}" stroke="${col}" stroke-width="${w}" stroke-linejoin="round">${sil}</g>` + strokes.map(([d, b]) => `<path d="${d}" fill="none" stroke="${col}" stroke-width="${b + w}" stroke-linecap="round"/>`).join('');
+    if (opts.goggle) gogC = opts.goggle;
+    const capSil = opts.cap ? `<path d="${CAP_PATH}"/>` : '';
+    const sil = legs + body + bridge + arms + ears + head + capSil + frontSil;
+    const pass = (col, w) => `<g fill="${col}" stroke="${col}" stroke-width="${w}" stroke-linejoin="round">${sil}</g>` + (opts.cap ? '' : strokes.slice(0, 1).map(([d, b]) => `<path d="${d}" fill="none" stroke="${col}" stroke-width="${b + w}" stroke-linecap="round"/>`).join('')) + strokes.slice(1).map(([d, b]) => `<path d="${d}" fill="none" stroke="${col}" stroke-width="${b + w}" stroke-linecap="round"/>`).join('');
     const fur_ = (s) => `<g fill="${F}">${s}</g>`;
     const fillPass = strokes.slice(1).map(([d, b]) => `<path d="${d}" fill="none" stroke="${F}" stroke-width="${b}" stroke-linecap="round"/>`).join('')
       + fur_(legs + body + bridge) + (armsBack ? fur_(arms) : '') + mid + (armsBack ? '' : fur_(arms))
       + fur_(ears) + earInner
-      + `<path d="${TUFT}" fill="none" stroke="${F}" stroke-width="3" stroke-linecap="round"/>`
-      + fur_(head) + goggles(gogC) + f.blush + f.eyes + extra + f.mouth + frontFill;
+      + (opts.cap ? '' : `<path d="${TUFT}" fill="none" stroke="${F}" stroke-width="3" stroke-linecap="round"/>`)
+      + fur_(head) + capFill(opts.cap) + goggles(gogC) + f.blush + f.eyes + extra + f.mouth + frontFill;
     return wrap(SHADOW + pass('#FFFFFF', 11) + pass(LINE, 4.6) + fillPass + drips(16) + (puff ? bubbles : ''));
   }
 
