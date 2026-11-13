@@ -355,14 +355,28 @@
     const chest = art(hero, P.item.chest, 130); if (ctx.live && !opened) chest.classList.add('wiggle');
     if (opened) chest.style.opacity = 0.45;
     txt(hero, opened ? '오늘의 상자를 열었어요' : '오늘의 상자가 도착했어요', 'H', C.ink);
-    txt(hero, opened ? '내일 수영하면 새 상자가 와요' : '오늘 기록으로 3개의 아이템이 들어 있어요', 'CR', C.sub);
+    txt(hero, opened ? '내일 수영하면 새 상자가 와요' : (ctx.live ? '오늘 기록(자유형 위주)으로 물고기 한 마리가 들어 있어요' : '오늘 기록으로 3개의 아이템이 들어 있어요'), 'CR', C.sub);
     if (ctx.live && !opened) tap(hero, () => ctx.act('openBox'), '상자 열기');
-    txt(b, opened ? '받은 아이템' : '상자 속 미리보기', 'CM', C.sub);
-    const items = al(b, 'H', { gap: 10, fillW: true });
-    [[A.school(), '고등어 떼', '자유형 · 기본', C.line, C.sub], [A.sea('otter', true), '해달 수경', '배영 · 반짝이', G.shine, C.primary], [P.item.sunrise, '일출 배경', '새벽 · 한정', C.pinkL, C.coral]].forEach(([svg, n, tag, tf, tc]) => {
-      const c = al(items, 'V', { gap: 6, pad: [12, 8], fill: C.card, radius: 16, align: 'CENTER', grow: true });
-      art(c, svg, 44); txt(c, n, 'CM', C.ink); pill(c, opened ? '획득!' : tag, opened ? C.btn : tf, opened ? '#FFFFFF' : tc);
-    });
+    if (opened) {
+      // 오늘 만난 물고기 한 마리
+      const k = st.lastCatch || 'mackerel';
+      txt(b, '오늘 만난 친구', 'CM', C.sub);
+      const card = al(b, 'H', { gap: 14, pad: [14, 16], fill: C.card, radius: 20, align: 'CENTER', fillW: true });
+      const ho = al(card, 'H', { fill: '#E8F4FF', radius: 36, w: 72, h: 72, align: 'CENTER', justify: 'CENTER' }); art(ho, A.sea(k), 64);
+      const col = al(card, 'V', { gap: 3, grow: true }); txt(col, SEA[k][0], 'H', C.ink); txt(col, SEA[k][2], 'CR', C.sub);
+      art(card, P.icon.chev(), 18);
+      tap(card, () => ctx.act('dexDetail', k), SEA[k][0] + ' 보기');
+    } else {
+      txt(b, ctx.live ? '오늘 나올 수 있는 친구' : '상자 속 미리보기', 'CM', C.sub);
+      const items = al(b, 'H', { gap: 10, fillW: true });
+      const preview = ctx.live
+        ? [['clownfish', '자유형 · 짧게', C.soft, C.primary], ['mackerel', '자유형 · 오래', C.soft, C.primary], ['tuna', '드물게 · 빠르게', G.shine, C.primary]].map(([k, tag, tf, tc]) => [st.friends.includes(k) ? A.sea(k) : A.seaSilhouette(k), st.friends.includes(k) ? SEA[k][0] : '???', tag, tf, tc])
+        : [[A.school(), '고등어 떼', '자유형 · 기본', C.line, C.sub], [A.sea('otter', true), '해달 수경', '배영 · 반짝이', G.shine, C.primary], [P.item.sunrise, '일출 배경', '새벽 · 한정', C.pinkL, C.coral]];
+      preview.forEach(([svg, n, tag, tf, tc]) => {
+        const c = al(items, 'V', { gap: 6, pad: [12, 8], fill: C.card, radius: 16, align: 'CENTER', grow: true });
+        art(c, svg, 44); txt(c, n, 'CM', n === '???' ? C.mute : C.ink); pill(c, tag, tf, tc);
+      });
+    }
     cta(b, opened ? '꾸미러 가기' : '상자 열기', () => (opened ? ctx.go('dress') : ctx.act('openBox')));
     tabBar(s, '홈');
     return s;

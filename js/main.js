@@ -80,20 +80,24 @@
         const chest = el('div', 'art big-chest shake', window.PROPS.item.chest); sh.appendChild(chest);
         const title = text('div', 'sh-title', '두근두근…'); sh.appendChild(title);
         const sub = text('div', 'sh-sub', '오늘 기록으로 상자를 여는 중'); sh.appendChild(sub);
-        const grid = el('div', 'reveal'); sh.appendChild(grid);
         const actions = el('div', 'sh-actions'); sh.appendChild(actions);
+        // 오늘 기록은 자유형 위주 → 물고기 중 한 마리 (참치는 드물게)
+        const r = Math.random();
+        const kind = r < 0.25 ? 'tuna' : r < 0.65 ? 'mackerel' : 'clownfish';
+        const isNew = !st.friends.includes(kind);
+        const [name] = U.SEA[kind];
         setTimeout(() => {
-          chest.classList.remove('shake'); chest.classList.add('opened');
-          title.textContent = '상자를 열었어요!'; sub.textContent = '새벽 수영 한정 · 아이템 3개';
-          [[A.school(), '고등어 떼', '바다 친구'], [A.sea('otter', true), '해달 수경', '배영 · 반짝이'], [window.PROPS.item.sunrise, '일출 배경', '새벽 · 한정']].forEach(([svg, n, t], i) => {
-            const c = el('div', 'reveal-item'); c.style.animationDelay = i * 120 + 'ms';
-            c.appendChild(el('div', 'art', svg)); c.appendChild(text('div', 'ri-name', n)); c.appendChild(text('div', 'ri-tag', t)); grid.appendChild(c);
-          });
-          actions.appendChild(button('모두 받기', true, () => {
-            st.boxOpened = true;
-            if (!st.owned.includes('goggle:otter')) st.owned.push('goggle:otter');
-            if (!st.friends.includes('mackerel')) st.friends.push('mackerel');
-            closeSheet(); refresh(); toast('해달 수경이 보관함에 들어왔어요');
+          chest.remove();
+          const catchEl = el('div', 'catch');
+          catchEl.appendChild(el('div', 'art catch-art', A.sea(kind)));
+          if (isNew) catchEl.appendChild(text('div', 'catch-new', 'NEW'));
+          sh.insertBefore(catchEl, title);
+          title.textContent = isNew ? `${name}를 처음 만났어요!` : `${name}를 또 만났어요!`;
+          sub.textContent = isNew ? '바다 도감에 새로 등록됐어요' : '자유형 800m · 친밀도가 올라갔어요';
+          actions.appendChild(button(isNew ? '도감에 넣기' : '받기', true, () => {
+            st.boxOpened = true; st.lastCatch = kind;
+            if (isNew) st.friends.push(kind);
+            closeSheet(); refresh(); toast(isNew ? `${name}가 바다 도감에 들어왔어요` : `${name}와 더 친해졌어요`);
           }));
         }, 1100);
       }, { center: true, sticky: true });
