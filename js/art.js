@@ -38,11 +38,11 @@
     const head = woolRing();
     const floatSil = `<rect x="26" y="112" width="16" height="13" rx="6" transform="rotate(42 34 118.5)"/><rect x="78" y="112" width="16" height="13" rx="6" transform="rotate(-42 86 118.5)"/>`;
     const capSil = opts.cap ? `<path d="${CAP_PATH}"/>` : '';
-    const sil = legs + body + bridge + arms + head + capSil + ears + floatSil;
+    const sil = legs + finSil(opts.fin) + body + bridge + arms + head + capSil + ears + floatSil;
     const pass = (c, w) => `<g fill="${c}" stroke="${c}" stroke-width="${w}" stroke-linejoin="round">${sil}</g>` + (opts.cap ? '' : `<path d="${TUFT}" fill="none" stroke="${c}" stroke-width="${3 + w}" stroke-linecap="round"/>`);
     const fur = (s) => `<g fill="${F}">${s}</g>`;
     const bl = puff ? [30, 90, 11, 7] : [33, 87, 7.5, 5.5];
-    const fill = fur(legs + body + bridge + arms) + (opts.cap ? '' : `<path d="${TUFT}" fill="none" stroke="${F}" stroke-width="3" stroke-linecap="round"/>`) + fur(head) + capFill(opts.cap)
+    const fill = fur(legs) + finFill(opts.fin) + fur(body + bridge) + (opts.suit ? suitFill(opts.suit) : '') + fur(arms) + (opts.cap ? '' :`<path d="${TUFT}" fill="none" stroke="${F}" stroke-width="3" stroke-linecap="round"/>`) + fur(head) + capFill(opts.cap)
       + `<path d="${puff ? FP : FN}" fill="${FACE}"/>`
       + `<g fill="${FACE}">${ears}</g><ellipse cx="6" cy="92" rx="8" ry="3" fill="#FFB8B8" transform="rotate(62 6 92)"/><ellipse cx="114" cy="92" rx="8" ry="3" fill="#FFB8B8" transform="rotate(-62 114 92)"/>`
       + goggles(opts.goggle || '#FFB547', 50)
@@ -54,6 +54,15 @@
     const b = puff ? `<circle cx="120" cy="62" r="3.5" fill="none" stroke="#7FC4FF" stroke-width="2"/><circle cx="125" cy="51" r="2.5" fill="none" stroke="#7FC4FF" stroke-width="1.8"/><circle cx="120" cy="43" r="1.7" fill="#7FC4FF"/>` : '';
     return wrap(SHADOW + pass('#FFFFFF', 11) + pass(LINE, 4.6) + fill + d + b);
   }
+
+  // 수영복 (opts.suit = { color, stripe }) · 오리발 (opts.fin = '#hex')
+  function suitFill(suit) {
+    return `<path d="M38 124c0-6 5-10 11-10h22c6 0 11 4 11 10v12c0 11-10 18-22 18s-22-7-22-18z" fill="${suit.color}"/><path d="M38 131h44M39 141h42" stroke="${suit.stripe || '#FFFFFF'}" stroke-width="3.5"/>`;
+  }
+  const FIN_L = 'M43 156C36 162 29 169 27 175C33 178 45 175 52 166Z';
+  const FIN_R = 'M77 156C84 162 91 169 93 175C87 178 75 175 68 166Z';
+  const finSil = (fin) => (fin ? `<path d="${FIN_L}"/><path d="${FIN_R}"/>` : '');
+  const finFill = (fin) => (fin ? `<g fill="${fin}"><path d="${FIN_L}"/><path d="${FIN_R}"/></g><path d="M38 166l-7 7M44 168l-6 7M82 166l7 7M76 168l6 7" stroke="#FFFFFF" stroke-opacity=".7" stroke-width="1.6" stroke-linecap="round"/>` : '');
 
   // 수모 (opts.cap = { color, deco })
   const CAP_PATH = 'M19 68C19 42 36 30 60 30s41 12 41 38z';
@@ -110,12 +119,13 @@
       extra = (puff ? '' : `<path d="M58 90l2 2 2-2z" fill="#FF7A8F"/>`) + `<path d="M${puff ? 17 : 22} 90l-10-2M${puff ? 17 : 22} 95l-10 1M${puff ? 103 : 98} 90l10-2M${puff ? 103 : 98} 95l10 1" stroke="${INK}" stroke-width="1.6" stroke-linecap="round" stroke-opacity=".7"/>`;
     }
     if (opts.goggle) gogC = opts.goggle;
+    if (opts.suit) mid = suitFill(opts.suit);
     const capSil = opts.cap ? `<path d="${CAP_PATH}"/>` : '';
-    const sil = legs + body + bridge + arms + ears + head + capSil + frontSil;
+    const sil = legs + finSil(opts.fin) + body + bridge + arms + ears + head + capSil + frontSil;
     const pass = (col, w) => `<g fill="${col}" stroke="${col}" stroke-width="${w}" stroke-linejoin="round">${sil}</g>` + (opts.cap ? '' : strokes.slice(0, 1).map(([d, b]) => `<path d="${d}" fill="none" stroke="${col}" stroke-width="${b + w}" stroke-linecap="round"/>`).join('')) + strokes.slice(1).map(([d, b]) => `<path d="${d}" fill="none" stroke="${col}" stroke-width="${b + w}" stroke-linecap="round"/>`).join('');
     const fur_ = (s) => `<g fill="${F}">${s}</g>`;
     const fillPass = strokes.slice(1).map(([d, b]) => `<path d="${d}" fill="none" stroke="${F}" stroke-width="${b}" stroke-linecap="round"/>`).join('')
-      + fur_(legs + body + bridge) + (armsBack ? fur_(arms) : '') + mid + (armsBack ? '' : fur_(arms))
+      + fur_(legs) + finFill(opts.fin) + fur_(body + bridge) + (armsBack ? fur_(arms) : '') + mid + (armsBack ? '' : fur_(arms))
       + fur_(ears) + earInner
       + (opts.cap ? '' : `<path d="${TUFT}" fill="none" stroke="${F}" stroke-width="3" stroke-linecap="round"/>`)
       + fur_(head) + capFill(opts.cap) + goggles(gogC) + f.blush + f.eyes + extra + f.mouth + frontFill;

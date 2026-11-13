@@ -43,15 +43,16 @@
       { id: 'collab', name: '콜라보 수경', tag: '브랜드 한정', tone: 'limited', svg: I.goggle('#456AFF'), goggle: '#456AFF' },
     ],
     suit: [
-      { id: 'basic', name: '줄무늬 수영복', tag: '기본', svg: I.suit('#3ED3C9') },
-      { id: 'coral', name: '산호 수영복', tag: '기본', svg: I.suit('#FF7A6B') },
-      { id: 'navy', name: '남색 수영복', tag: '기본', svg: I.suit('#1E3A8A', '#9EB3FF') },
-      { id: 'collab', name: '콜라보 수영복', tag: '브랜드 한정', tone: 'limited', svg: I.suit('#456AFF', '#FFBFEC') },
+      { id: 'basic', name: '처음 옷', tag: '기본', svg: I.suit('#3ED3C9'), suit: null },
+      { id: 'mint', name: '민트 줄무늬', tag: '기본', svg: I.suit('#3ED3C9'), suit: { color: '#3ED3C9' } },
+      { id: 'coral', name: '산호 수영복', tag: '기본', svg: I.suit('#FF7A6B'), suit: { color: '#FF7A6B' } },
+      { id: 'navy', name: '남색 수영복', tag: '기본', svg: I.suit('#1E3A8A', '#9EB3FF'), suit: { color: '#1E3A8A', stripe: '#9EB3FF' } },
+      { id: 'collab', name: '콜라보 수영복', tag: '브랜드 한정', tone: 'limited', svg: I.suit('#456AFF', '#FFBFEC'), suit: { color: '#456AFF', stripe: '#FFBFEC' } },
     ],
     fin: [
-      { id: 'basic', name: '노랑 오리발', tag: '기본', svg: I.fin('#FFC94A') },
-      { id: 'blue', name: '파랑 오리발', tag: '기본', svg: I.fin('#4DA3FF') },
-      { id: 'pink', name: '분홍 오리발', tag: '자유형 5km 달성 시', svg: I.fin('#FF9EC4') },
+      { id: 'basic', name: '노랑 오리발', tag: '기본', svg: I.fin('#FFC94A'), fin: '#FFC94A' },
+      { id: 'blue', name: '파랑 오리발', tag: '기본', svg: I.fin('#4DA3FF'), fin: '#4DA3FF' },
+      { id: 'pink', name: '분홍 오리발', tag: '자유형 5km 달성 시', svg: I.fin('#FF9EC4'), fin: '#FF9EC4' },
     ],
   };
   const SEA = {
@@ -71,8 +72,8 @@
 
   const DEFAULT_STATE = {
     onboarded: false, kind: 'rabbit', fur: '#FFFFFF', name: '새벽반 흰토끼', nameEdited: false, pool: 0,
-    equip: { cap: 'basic', goggle: 'basic', suit: 'basic', fin: 'basic' },
-    owned: ['cap:basic', 'cap:dots', 'cap:whale', 'cap:rainbow', 'cap:team', 'goggle:basic', 'goggle:navy', 'goggle:pink', 'suit:basic', 'suit:coral', 'suit:navy', 'fin:basic', 'fin:blue'],
+    equip: { cap: 'basic', goggle: 'basic', suit: 'basic', fin: null },
+    owned: ['cap:basic', 'cap:dots', 'cap:whale', 'cap:rainbow', 'cap:team', 'goggle:basic', 'goggle:navy', 'goggle:pink', 'suit:basic', 'suit:mint', 'suit:coral', 'suit:navy', 'fin:basic', 'fin:blue'],
     friends: ['clownfish', 'mackerel', 'turtle', 'otter', 'dolphin', 'octopus', 'jellyfish', 'puffer', 'starfish', 'crab', 'shrimp', 'seahorse'],
     follow: ['clownfish', 'mackerel', 'turtle'],
     boxOpened: false, tab: 'cap', dexFilter: '전체', noticeFilter: '전체', openNotice: -1, read: [],
@@ -87,7 +88,9 @@
     if (!ctx.live) return A.animal(st.kind, st.fur, expr);
     const cap = st.equip.cap && itemOf('cap', st.equip.cap);
     const gog = st.equip.goggle && itemOf('goggle', st.equip.goggle);
-    return A.animal(st.kind, st.fur, expr, { cap: cap && cap.cap, goggle: gog && gog.goggle });
+    const suit = st.equip.suit && itemOf('suit', st.equip.suit);
+    const fin = st.equip.fin && itemOf('fin', st.equip.fin);
+    return A.animal(st.kind, st.fur, expr, { cap: cap && cap.cap, goggle: gog && gog.goggle, suit: suit && suit.suit, fin: fin && fin.fin });
   }
 
   // ---------- 빌더: 피그마 오토레이아웃 → CSS flex ----------

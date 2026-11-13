@@ -1,7 +1,7 @@
 // 우수꾸 앱: 라우팅 · 상태 저장 · 상자 열기 · 시트 · 토스트
 (function () {
   const U = window.USUKKU, A = window.ART;
-  const KEY = 'usukku:v1';
+  const KEY = 'usukku:v2';
   const ROUTES = { splash: '00-0', intro: '00-0b', pick: '00', 'pool-pick': '00-2', home: '01', dress: '02', pool: '03', mypool: '04', 'mypool-side': '04-2', dex: '05', my: '06', menu: '07', notice: '08' };
   const MAIN = ['home', 'dress', 'pool', 'dex'];
 
@@ -106,7 +106,8 @@
     equip(cat, id) {
       const it = U.ITEMS[cat].find((x) => x.id === id);
       if (!st.owned.includes(cat + ':' + id)) { toast(`🔒 ${it.name} · ${it.tag}`); return; }
-      if (st.equip[cat] === id) return;
+      // 오리발은 한 번 더 누르면 벗기
+      if (st.equip[cat] === id) { if (cat === 'fin') { st.equip.fin = null; refresh(); toast('오리발을 벗었어요'); } return; }
       st.equip[cat] = id; refresh(); toast(`${it.name} 착용!`);
     },
     toggleFollow(k) {
