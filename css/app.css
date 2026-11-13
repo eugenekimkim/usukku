@@ -1,26 +1,15 @@
 /* 우수꾸 앱 셸 */
 * { box-sizing: border-box; }
 html, body { margin: 0; height: 100%; }
-body.app { font-family: var(--font-family); letter-spacing: var(--tracking); color: var(--ink); background: var(--g-special);
-  display: flex; align-items: center; justify-content: center; gap: 56px; min-height: 100vh; -webkit-font-smoothing: antialiased; }
-
-.side { width: 260px; }
-.side-logo { font-size: 44px; font-weight: 800; letter-spacing: -0.04em; }
-.side p { color: var(--sub); line-height: 1.6; margin: 10px 0 0; }
-.side .side-note { font-size: 13px; color: var(--mute); }
-.side-link { display: inline-block; margin-top: 18px; font-weight: 700; color: var(--btn); text-decoration: none; padding: 10px 14px; border-radius: 999px; background: rgba(255,255,255,.75); }
-.side-link:hover { background: #fff; }
+/* 모바일 비율(390 × 844)만 유지하고 화면 가운데에 꽉 차게 */
+body.app { font-family: var(--font-family); letter-spacing: var(--tracking); color: var(--ink); background: var(--bg);
+  display: flex; align-items: center; justify-content: center; height: 100vh; height: 100dvh; overflow: hidden; -webkit-font-smoothing: antialiased; }
 
 .device { zoom: var(--app-zoom, 1); }
-.phone { position: relative; width: 390px; height: 844px; border-radius: 48px; overflow: hidden; background: var(--bg);
-  box-shadow: 0 0 0 10px #fff, 0 30px 70px -20px rgba(31,76,140,.55); }
+.phone { position: relative; width: 390px; height: 844px; overflow: hidden; background: var(--bg); }
 #view, #view .screen { width: 390px; height: 844px; }
 #layer { position: absolute; inset: 0; pointer-events: none; }
 #layer > * { pointer-events: auto; }
-
-body.app.narrow { background: var(--bg); align-items: flex-start; }
-body.app.narrow .side { display: none; }
-body.app.narrow .phone { border-radius: 0; box-shadow: none; }
 
 /* 누를 수 있는 요소 */
 .tappable { cursor: pointer; transition: transform .12s ease, filter .12s ease; -webkit-tap-highlight-color: transparent; }

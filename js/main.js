@@ -152,10 +152,9 @@
 
   // ---------- 화면 맞추기 · 시작 ----------
   function fit() {
-    const narrow = window.innerWidth <= 500;
-    const z = narrow ? Math.min(window.innerWidth / 390, window.innerHeight / 844) : Math.min(1, (window.innerHeight - 48) / 844);
+    // 390 × 844 비율을 지킨 채 창 안에 가장 크게
+    const z = Math.min(window.innerWidth / 390, window.innerHeight / 844);
     document.documentElement.style.setProperty('--app-zoom', z.toFixed(4));
-    document.body.classList.toggle('narrow', narrow);
   }
   window.addEventListener('resize', fit);
   window.addEventListener('hashchange', () => { closeSheet(); render(location.hash.slice(1)); });
