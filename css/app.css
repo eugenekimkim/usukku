@@ -77,3 +77,10 @@ body.app { font-family: var(--font-family); letter-spacing: var(--tracking); col
 @keyframes rise { from { transform: translateY(14px); opacity: 0; } to { transform: none; opacity: 1; } }
 
 @media (prefers-reduced-motion: reduce) { .wiggle, .float, .bob, .loader > *, .big-chest.shake { animation: none; } }
+
+/* MY POOL 바닥 꾸미기 */
+.side-scene.decorating .deco { cursor: pointer; outline: 2px dashed rgba(255,255,255,.85); outline-offset: 2px; border-radius: 8px; animation: decoWiggle 1.6s ease-in-out infinite; }
+.side-scene.decorating .deco:hover { outline-color: #456AFF; }
+@keyframes decoWiggle { 0%,100% { rotate: -2deg; } 50% { rotate: 2deg; } }
+@media (prefers-reduced-motion: reduce) { .side-scene.decorating .deco { animation: none; } }
+.verify-art { width: 120px; margin: 4px auto 0; }

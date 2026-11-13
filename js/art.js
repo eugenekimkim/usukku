@@ -182,17 +182,47 @@
   // ---------- 물개 코치 ----------
   const seal = `<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><g fill="${INK}" stroke="${INK}" stroke-width="3" stroke-linejoin="round"><path d="M14 52C10 40 14 22 30 16C42 12 52 20 52 32C52 44 44 54 32 56C24 57 18 56 14 52Z"/><ellipse cx="14" cy="50" rx="8" ry="4" transform="rotate(-25 14 50)"/><ellipse cx="50" cy="50" rx="8" ry="4" transform="rotate(25 50 50)"/></g><path d="M14 52C10 40 14 22 30 16C42 12 52 20 52 32C52 44 44 54 32 56C24 57 18 56 14 52Z" fill="#B7C3CF"/><ellipse cx="14" cy="50" rx="8" ry="4" fill="#B7C3CF" transform="rotate(-25 14 50)"/><ellipse cx="50" cy="50" rx="8" ry="4" fill="#B7C3CF" transform="rotate(25 50 50)"/><path d="M24 18c4-6 14-7 20-2l-2 4c-5-3-11-3-16 1z" fill="#FF7A6B" stroke="${INK}" stroke-width="2" stroke-linejoin="round"/><ellipse cx="37" cy="33" rx="7" ry="5" fill="#E7EDF3"/><circle cx="29" cy="28" r="1.8" fill="${INK}"/><circle cx="43" cy="28" r="1.8" fill="${INK}"/><ellipse cx="37" cy="31" rx="2.2" ry="1.6" fill="${INK}"/><path d="M33 34l-6 1M33 36l-6 2M41 34l6 1M41 36l6 2" stroke="${INK}" stroke-width="1.1" stroke-linecap="round"/><path d="M36 38v8" stroke="#1F8BFF" stroke-width="1.6"/><rect x="33.5" y="45" width="5" height="4" rx="1.5" fill="#FFC94A" stroke="${INK}" stroke-width="1.4"/><ellipse cx="24" cy="34" rx="3.5" ry="2.2" fill="#FF9E9E" fill-opacity=".7"/></svg>`;
 
-  // ---------- 옆에서 본 수영하는 토끼 ----------
-  const swSil = `<ellipse cx="54" cy="46" rx="30" ry="12"/><ellipse cx="24" cy="44" rx="7" ry="5" transform="rotate(-20 24 44)"/><ellipse cx="20" cy="51" rx="7" ry="5" transform="rotate(20 20 51)"/><path d="M80 30c-10-4-24-2-34 4 8 1 18 1 28 0z"/><ellipse cx="70" cy="22" rx="5.5" ry="14" transform="rotate(-40 70 22)"/><circle cx="92" cy="38" r="17"/>`;
-  function swimmer(flip = false) {
-    return `<svg viewBox="0 0 120 72" xmlns="http://www.w3.org/2000/svg"><g ${flip ? 'transform="translate(120 0) scale(-1 1)"' : ''}>
-<g fill="#FFFFFF" stroke="#FFFFFF" stroke-width="7" stroke-linejoin="round">${swSil}</g><g fill="${INK}" stroke="${INK}" stroke-width="3.6" stroke-linejoin="round">${swSil}</g><g fill="#FFFFFF">${swSil}</g>
-<path d="M74 31c-9-2-19-1-26 3" stroke="#FF9EB5" stroke-width="2.4" stroke-linecap="round" fill="none"/>
-<path d="M33 54c5-6 14-8 26-7" stroke="#3ED3C9" stroke-width="7" stroke-linecap="round" fill="none"/>
-<path d="M76 34h33" stroke="#FF7A6B" stroke-width="3" stroke-linecap="round"/><circle cx="100" cy="35" r="5" fill="#3ED3C9" stroke="#FF7A6B" stroke-width="2.2"/>
-<ellipse cx="96" cy="45" rx="5" ry="3.2" fill="#FF9E9E" fill-opacity=".8"/><path d="M105 44c1 1.5 2.4 1.5 3.4 0" stroke="${INK}" stroke-width="1.6" fill="none" stroke-linecap="round"/>
-<circle cx="8" cy="36" r="2.4" fill="#FFFFFF"/><circle cx="4" cy="44" r="1.8" fill="#FFFFFF"/><circle cx="10" cy="52" r="2" fill="#FFFFFF"/></g></svg>`;
+  // ---------- 옆에서 본 수영하는 친구 (자유형, 오른쪽을 보고 헤엄) ----------
+  const SW_GOG = { rabbit: '#FF7A6B', hamster: '#1F8BFF', bear: '#1F8BFF', cat: '#FF7A6B', sheep: '#FFB547' };
+  const SW_SUIT = { rabbit: { color: '#3ED3C9' }, bear: { color: '#1E3A8A' } };
+  // opts: { cap: {color}, goggle, suit: {color, stripe} | null(=처음 옷), fin }
+  function swimmerFor(kind = 'rabbit', fur = 'white', opts = {}, flip = false) {
+    const F = fur === 'white' ? FUR.white : (fur && fur[0] === '#' ? fur : FUR[kind]);
+    const gog = opts.goggle || SW_GOG[kind];
+    const suit = opts.suit || SW_SUIT[kind];
+    const body = `<ellipse cx="58" cy="46" rx="28" ry="12"/>`;
+    const feet = `<ellipse cx="28" cy="41" rx="7" ry="4.6" transform="rotate(-24 28 41)"/><ellipse cx="26" cy="51" rx="7" ry="4.6" transform="rotate(22 26 51)"/>`;
+    const fins = opts.fin ? `<path d="M24 38L6 28L10 43Z"/><path d="M22 53L4 60L12 46Z"/>` : '';
+    const armBack = `<ellipse cx="50" cy="53" rx="10" ry="4.4" transform="rotate(12 50 53)"/>`;
+    const armFront = `<ellipse cx="114" cy="31" rx="12" ry="5" transform="rotate(-12 114 31)"/>`;
+    const head = `<circle cx="92" cy="40" r="18"/>`;
+    let ears = '', earIn = '', wool = '', extraFront = '', extraBack = '', face = '';
+    if (kind === 'rabbit') { ears = `<ellipse cx="73" cy="27" rx="5.5" ry="14" transform="rotate(-62 73 27)"/>`; earIn = `<ellipse cx="73" cy="27" rx="2.4" ry="9" fill="#FF9EB5" transform="rotate(-62 73 27)"/>`; }
+    if (kind === 'bear') { ears = `<circle cx="80" cy="26" r="6.5"/><circle cx="93" cy="22" r="6.5"/>`; earIn = `<circle cx="80" cy="26" r="3" fill="#E8C3A5"/><circle cx="93" cy="22" r="3" fill="#E8C3A5"/>`; face = `<ellipse cx="106" cy="46" rx="6" ry="4.5" fill="#F1D9C2"/><ellipse cx="110" cy="44" rx="2" ry="1.5" fill="${INK}"/>`; }
+    if (kind === 'hamster') { ears = `<circle cx="81" cy="27" r="5.2"/><circle cx="93" cy="23" r="5.2"/>`; earIn = `<circle cx="81" cy="27" r="2.3" fill="#FF9EB5"/><circle cx="93" cy="23" r="2.3" fill="#FF9EB5"/>`;
+      extraFront = `<rect x="110" y="25" width="20" height="11" rx="4" fill="#FFE59A" stroke="${INK}" stroke-width="2" transform="rotate(-12 120 30)"/><path d="M114 33c2-1 4-1 6 0s4 1 6 0" stroke="#7FC4FF" stroke-width="1.6" fill="none" transform="rotate(-12 120 30)"/>`; }
+    if (kind === 'cat') { ears = `<path d="M76 31L77 14L89 24Z"/><path d="M89 24L96 9L103 24Z"/>`; earIn = `<path d="M79 26L79.5 18L85 23Z" fill="#FF9EB5"/><path d="M92 22L95.5 14L99 22Z" fill="#FF9EB5"/>`;
+      extraBack = `<path d="M32 40c-9-5-8-15-1-17" stroke="${INK}" stroke-width="7.5" fill="none" stroke-linecap="round"/><path d="M32 40c-9-5-8-15-1-17" stroke="${F}" stroke-width="3.5" fill="none" stroke-linecap="round"/>`;
+      extraFront = `<ellipse cx="60" cy="46" rx="7" ry="15" fill="none" stroke="${INK}" stroke-width="9"/><ellipse cx="60" cy="46" rx="7" ry="15" fill="none" stroke="#FFC94A" stroke-width="5.6"/><path d="M53 36l3 3M53 56l3-3" stroke="#FF7A6B" stroke-width="3"/>`; }
+    if (kind === 'sheep') { wool = `<circle cx="75" cy="40" r="7.5"/><circle cx="77" cy="28" r="7.5"/><circle cx="86" cy="21" r="7.5"/><circle cx="98" cy="21" r="7.5"/><circle cx="107" cy="28" r="6.5"/><circle cx="46" cy="36" r="7"/><circle cx="58" cy="34" r="8"/><circle cx="70" cy="36" r="7"/>`;
+      face = `<circle cx="97" cy="43" r="12.5" fill="#FFE2CC"/><ellipse cx="84" cy="46" rx="7" ry="3.2" fill="#FFE2CC" stroke="${INK}" stroke-width="1.6" transform="rotate(38 84 46)"/>`;
+      extraFront = `<rect x="104" y="27" width="9" height="11" rx="3.5" fill="#FF9A5B" stroke="${INK}" stroke-width="1.8" transform="rotate(-12 108 32)"/>`; }
+    const cap = opts.cap ? `<path d="M74 41a18 18 0 0 1 36 -2z"/>` : '';
+    const sil = fins + feet + armBack + body + wool + ears + head + cap + armFront;
+    const pass = (c, w) => `<g fill="${c}" stroke="${c}" stroke-width="${w}" stroke-linejoin="round">${sil}</g>`;
+    const f = (s) => `<g fill="${F}">${s}</g>`;
+    const fill = (opts.fin ? `<g fill="${opts.fin}">${fins}</g><path d="M14 33l-6 3M14 51l-7 4" stroke="#FFFFFF" stroke-opacity=".7" stroke-width="1.4" stroke-linecap="round"/>` : '')
+      + extraBack + f(feet + armBack + body)
+      + (suit ? `<path d="M44 35.5Q58 33 72 36.5L72 56Q58 59 44 56.5Z" fill="${suit.color}"/><path d="M44 46h28" stroke="${suit.stripe || '#FFFFFF'}" stroke-width="3" stroke-opacity=".9"/>` : '')
+      + f(wool + ears) + earIn + f(head) + face
+      + (opts.cap ? `<path d="M74 41a18 18 0 0 1 36 -2z" fill="${opts.cap.color}"/><path d="M75 39h34" stroke="#0F2A43" stroke-opacity=".12" stroke-width="3"/>` : '')
+      + `<path d="M75 37h35" stroke="${gog}" stroke-width="3" stroke-linecap="round"/><circle cx="101" cy="37" r="5.5" fill="#3ED3C9" stroke="${gog}" stroke-width="2.2"/>`
+      + `<ellipse cx="98" cy="48" rx="4.6" ry="3" fill="#FF9E9E" fill-opacity=".8"/>${kind === 'bear' ? '' : `<circle cx="108.5" cy="47" r="1.7" fill="none" stroke="${INK}" stroke-width="1.4"/>`}`
+      + f(armFront) + extraFront;
+    const splash = `<circle cx="10" cy="34" r="2.4" fill="#FFFFFF"/><circle cx="5" cy="44" r="1.8" fill="#FFFFFF"/><circle cx="11" cy="54" r="2" fill="#FFFFFF"/><circle cx="122" cy="40" r="1.6" fill="#FFFFFF"/><circle cx="125" cy="47" r="2.2" fill="none" stroke="#FFFFFF" stroke-width="1.2"/>`;
+    return `<svg viewBox="0 0 130 72" xmlns="http://www.w3.org/2000/svg"><g ${flip ? 'transform="translate(130 0) scale(-1 1)"' : ''}>${pass('#FFFFFF', 7)}${pass(INK, 3.6)}${fill}${splash}</g></svg>`;
   }
+  const swimmer = (flip = false) => swimmerFor('rabbit', 'white', {}, flip);
 
-  window.ART = { animal, sea, school, seaSilhouette, seal, swimmer, INK };
+  window.ART = { animal, sea, school, seaSilhouette, seal, swimmer, swimmerFor, INK };
 })();

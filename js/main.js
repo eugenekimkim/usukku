@@ -2,7 +2,7 @@
 (function () {
   const U = window.USUKKU, A = window.ART;
   const KEY = 'usukku:v2';
-  const ROUTES = { splash: '00-0', intro: '00-0b', pick: '00', 'pool-pick': '00-2', home: '01', dress: '02', pool: '03', mypool: '04', 'mypool-side': '04-2', dex: '05', my: '06', menu: '07', notice: '08' };
+  const ROUTES = { splash: '00-0', intro: '00-0b', pick: '00', 'pool-pick': '00-2', home: '01', dress: '02', pool: '03', mypool: '04-2', 'mypool-side': '04-2', 'pool-set': '09', dex: '05', my: '06', menu: '07', notice: '08' };
   const MAIN = ['home', 'dress', 'pool', 'dex'];
 
   const clone = (o) => JSON.parse(JSON.stringify(o));
@@ -34,7 +34,7 @@
     view.replaceChildren(s);
     const next = view.querySelector('.scroll'); if (next) next.scrollTop = top;
     phone.dataset.route = r;
-    document.title = `우수꾸 · ${{ splash: '시작', intro: '시작', pick: '캐릭터 선택', 'pool-pick': '수영장 선택', home: '오늘의 상자', dress: '꾸미기', pool: '우리 수영장', mypool: 'MY POOL', 'mypool-side': 'MY POOL', dex: '바다 도감', my: '마이', menu: '전체 메뉴', notice: '공지사항' }[r]}`;
+    document.title = `우수꾸 · ${{ splash: '시작', intro: '시작', pick: '캐릭터 선택', 'pool-pick': '수영장 선택', home: '오늘의 상자', dress: '꾸미기', pool: '우리 수영장', mypool: 'MY POOL', 'mypool-side': 'MY POOL', 'pool-set': '내 수영장 설정', dex: '바다 도감', my: '마이', menu: '전체 메뉴', notice: '공지사항' }[r]}`;
     if (r === 'splash') { clearTimeout(splashTimer); splashTimer = setTimeout(() => { if (route === 'splash') ctx.go(st.onboarded ? 'home' : 'intro'); }, 1800); }
   }
   let splashTimer;
@@ -117,15 +117,68 @@
       else st.follow.push(k);
       refresh();
     },
-    toggleDecorate() { st.decorate = st.decorate === false; refresh(); toast(st.decorate ? '꾸미기 모드' : '구경 모드'); },
-    place(k, n) { if (!st.tray[k]) { toast(`${n}이(가) 더 없어요`); return; } st.tray[k]--; refresh(); toast(`${n}을(를) 풀에 놓았어요`); },
-    guestbook() {
-      st.guestbook = 0; refresh();
+    toggleDecorate() { st.decorate = !st.decorate; refresh(); toast(st.decorate ? '꾸미기 모드 · 아이템을 골라 바닥에 놓아요' : '다 꾸몄어요!'); },
+    place(k, n) {
+      if (!st.tray[k]) { toast(`${n}이(가) 더 없어요`); return; }
+      // 바닥(비치볼은 물 위)에서 비어 있는 자리 찾기
+      const used = st.placed.filter((p) => (p[0] === 'ball') === (k === 'ball')).map((p) => p[1]);
+      let best = 30, gap = -1;
+      for (let x = 30; x <= 360; x += 6) { const d = Math.min(...used.map((u) => Math.abs(u - x)), 999); if (d > gap) { gap = d; best = x; } }
+      const colors = { coral: ['#FF9EC4', '#FFB547', '#B79CFF'], shell: ['#FFD978', '#FFB8C8', '#C9B8FF'] };
+      const c = colors[k] ? colors[k][st.placed.length % 3] : undefined;
+      st.placed.push(c ? [k, best, c] : [k, best]);
+      st.tray[k]--; refresh(); toast(`${n}을(를) 풀에 놓았어요`);
+    },
+    removeDeco(i) {
+      const p = st.placed[i]; if (!p) return;
+      st.placed.splice(i, 1);
+      if (p[0] !== 'rock') st.tray[p[0]] = (st.tray[p[0]] || 0) + 1;
+      refresh(); toast(p[0] === 'rock' ? '바위를 치웠어요' : '보관함에 다시 넣었어요');
+    },
+    // 내 수영장 설정
+    poolSlot(i) { st.slot = i; if (st.slots[i] != null) st.pool = st.slots[i]; refresh(); },
+    removeSlot() {
       sheet((sh) => {
-        sh.appendChild(text('div', 'sh-title', '물방울 쪽지'));
-        [['햇살반 햄스터', '킥판 졸업 축하해요! 저도 곧 따라갈게요'], ['바람결 곰', '풀 꾸민 거 너무 귀엽다 산호 어디서 받았어요?'], ['새벽반 양', '내일 새벽반에서 봬요 🫧']].forEach(([w, m]) => { const r = el('div', 'note'); r.appendChild(text('div', 'note-who', w)); r.appendChild(text('div', 'note-msg', m)); sh.appendChild(r); });
-        const a = el('div', 'sh-actions'); a.appendChild(button('닫기', true, closeSheet)); sh.appendChild(a);
-      });
+        sh.appendChild(text('div', 'sh-title', '이 수영장을 지울까요?'));
+        sh.appendChild(text('div', 'sh-sub', `${U.POOLS[st.slots[1]][0]}을(를) 내 수영장에서 지워요.`));
+        const a = el('div', 'sh-actions');
+        a.appendChild(button('취소', false, closeSheet));
+        a.appendChild(button('지우기', true, () => { st.slots[1] = null; st.slot = 0; st.pool = st.slots[0]; closeSheet(); refresh(); toast('수영장을 지웠어요'); }));
+        sh.appendChild(a);
+      }, { center: true });
+    },
+    locate() {
+      // 아티팩트 안에서는 실제 위치를 쓸 수 없어 데모 위치로 대신해요
+      toast('현재 위치를 확인하는 중…');
+      setTimeout(() => { st.located = true; refresh(); toast('현재 위치 · 성내동 근처'); }, 700);
+    },
+    choosePool(i) {
+      const slot = st.slot || 0;
+      if (st.slots[slot] === i) return;
+      if (st.slots.includes(i)) { toast('이미 등록한 수영장이에요'); return; }
+      const [name, , , dong] = U.POOLS[i];
+      sheet((sh) => {
+        sh.appendChild(text('div', 'sh-title', `${dong} ${name}으로 바꿀까요?`));
+        sh.appendChild(text('div', 'sh-sub', '우리 수영장 · 공동 리프가 새 수영장으로 바뀌어요. 모은 친구와 아이템은 그대로예요.'));
+        const a = el('div', 'sh-actions');
+        a.appendChild(button('취소', false, closeSheet));
+        a.appendChild(button('바꾸기', true, () => { st.slots[slot] = i; st.pool = i; closeSheet(); refresh(); toast(`내 수영장이 ${name}으로 바뀌었어요`); }));
+        sh.appendChild(a);
+      }, { center: true });
+    },
+    verify() {
+      const i = st.slots[st.slot || 0];
+      sheet((sh) => {
+        sh.classList.add('box-open');
+        sh.appendChild(el('div', 'art verify-art float', A.seal));
+        const t = text('div', 'sh-title', '위치를 확인하는 중…'); sh.appendChild(t);
+        const sub = text('div', 'sh-sub', `${U.POOLS[i][0]} 근처에 있는지 확인하고 있어요`); sh.appendChild(sub);
+        const a = el('div', 'sh-actions'); sh.appendChild(a);
+        setTimeout(() => {
+          t.textContent = '인증 완료!'; sub.textContent = `이제 ${U.POOLS[i][0]} 공동 리프에 함께해요`;
+          a.appendChild(button('좋아요', true, () => { st.verified[i] = true; closeSheet(); refresh(); }));
+        }, 1000);
+      }, { center: true, sticky: true });
     },
     dexFilter(c) { st.dexFilter = c; refresh(); },
     dexDetail(k) {

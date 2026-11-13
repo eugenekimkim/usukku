@@ -20,6 +20,7 @@
     locate: sv('0 0 24 24', `<circle cx="12" cy="12" r="4" fill="#1F8BFF"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3" stroke="#1F8BFF" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="12" r="7.5" stroke="#1F8BFF" stroke-width="2"/>`),
     music: sv('0 0 16 16', `<path d="M6 12V3l8-1.5V10" stroke="#1F8BFF" stroke-width="1.6" stroke-linecap="round"/><circle cx="4.5" cy="12" r="2" fill="#1F8BFF"/><circle cx="12.5" cy="10.5" r="2" fill="#1F8BFF"/>`),
     play: sv('0 0 12 12', `<path d="M3 1.5v9l7.5-4.5z" fill="#456AFF"/>`),
+    gearS: (c) => sv('0 0 24 24', `<circle cx="12" cy="12" r="3.4" stroke="${c}" stroke-width="2.4"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1" stroke="${c}" stroke-width="2.4" stroke-linecap="round"/>`),
     gear: sv('0 0 24 24', `<circle cx="12" cy="12" r="3.2" stroke="#0F2A43" stroke-width="2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1" stroke="#0F2A43" stroke-width="2" stroke-linecap="round"/>`),
     close: sv('0 0 24 24', `<path d="M6 6l12 12M18 6L6 18" stroke="#0F2A43" stroke-width="2.2" stroke-linecap="round"/>`),
     back: sv('0 0 24 24', `<path d="M15 5l-7 7 7 7" stroke="#0F2A43" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>`),
@@ -56,6 +57,8 @@
 
   const scene = {};
   scene.reef = `<svg viewBox="0 0 318 86" xmlns="http://www.w3.org/2000/svg"><path d="M0 70c40-6 80-6 120-2s80 6 120 2 60-4 78-2v18H0z" fill="#F6E3B4"/><path d="M44 72V36M44 52c8-4 12-10 12-20M44 58c-9-2-13-9-13-18" stroke="#FF7A6B" stroke-width="7" stroke-linecap="round" fill="none"/><path d="M110 72c-4-12-2-22 4-30M114 52c6 0 12-6 12-14M108 60c-8-2-12-8-12-16" stroke="#FF9EC4" stroke-width="7" stroke-linecap="round" fill="none"/><circle cx="180" cy="58" r="13" fill="#FFB547"/><circle cx="174" cy="54" r="2" fill="#E0942A"/><circle cx="184" cy="60" r="2" fill="#E0942A"/><circle cx="182" cy="51" r="2" fill="#E0942A"/><path d="M236 72c-6-10 6-18 0-28s6-16 0-24M248 72c-5-9 5-15 0-24" stroke="#3FA65A" stroke-width="5" stroke-linecap="round" fill="none"/><path d="M294 72V44M294 56c7-3 10-8 10-16" stroke="#1F8BFF" stroke-width="6" stroke-linecap="round" fill="none" stroke-dasharray="4 6" stroke-opacity=".5"/><path d="M150 22c0 3-4 5-8 5s-7-2-7-5 3-5 7-5 8 2 8 5zM149 22l6-4v8z" fill="#4DA3FF"/><path d="M78 14c0 2.5-3 4-6 4s-5-1.5-5-4 2-4 5-4 6 1.5 6 4zM77 14l5-3v6z" fill="#7BB8FF"/><circle cx="210" cy="16" r="2.5" fill="#FFFFFF"/><circle cx="216" cy="8" r="1.8" fill="#FFFFFF"/></svg>`;
+  // 공동 리프 수조: 물 그라디언트 · 빛줄기 · 물결
+  scene.reefWater = `<svg viewBox="0 0 318 129" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="rw" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#C9F1FF"/><stop offset=".55" stop-color="#8FD6F5"/><stop offset="1" stop-color="#5FB8E8"/></linearGradient></defs><rect width="318" height="129" fill="url(#rw)"/><path d="M30 0l40 129h26L60 0zM150 0l30 129h22L176 0zM250 0l24 129h18L270 0z" fill="#FFFFFF" fill-opacity=".16"/><path d="M0 9c13-5 26-5 40 0s27 5 40 0 26-5 40 0 27 5 40 0 26-5 40 0 27 5 40 0 26-5 40 0 26 5 38 0" stroke="#FFFFFF" stroke-opacity=".75" stroke-width="2" fill="none"/><circle cx="64" cy="40" r="2.5" fill="none" stroke="#FFFFFF" stroke-opacity=".8" stroke-width="1.3"/><circle cx="70" cy="28" r="1.6" fill="#FFFFFF" fill-opacity=".8"/><circle cx="236" cy="52" r="2.8" fill="none" stroke="#FFFFFF" stroke-opacity=".8" stroke-width="1.3"/><circle cx="242" cy="38" r="1.8" fill="#FFFFFF" fill-opacity=".8"/></svg>`;
   scene.teamCap = `<svg viewBox="0 0 48 40" xmlns="http://www.w3.org/2000/svg"><path d="M6 30C6 16 14 6 24 6s18 10 18 24z" fill="#3FA65A"/><path d="M14 22h20" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round"/><rect x="4" y="28" width="40" height="6" rx="3" fill="#0F2A43" fill-opacity=".15"/></svg>`;
 
   // MY POOL (위에서 본 수영장, 흰 토끼)
@@ -93,9 +96,19 @@ ${rope}<path d="${wave} V470 H0 Z" fill="url(#sideW)"/>
 <path d="M0 140h12M0 190h12M0 240h12M0 290h12M0 340h12M0 390h12M378 140h12M378 190h12M378 240h12M378 290h12M378 340h12M378 390h12" stroke="#B4D3EE" stroke-width="1.5"/>
 <rect x="12" y="438" width="366" height="32" fill="#CFE8FF"/><path d="M12 438h366" stroke="#B4D3EE" stroke-width="2"/><path d="M60 452h270M60 446v12M330 446v12" stroke="#2F5FBF" stroke-width="4" stroke-opacity=".55" stroke-linecap="round"/>
 <path d="M14 440C70 414 130 422 196 430C258 420 318 412 376 440Z" fill="#F6E3B4"/>
-${weed(40)}${branch(78, '#FF9EC4', 34)}${weed(128)}${shell(168, '#FFD978')}${shell(192, '#FFB8C8')}${shell(212, '#C9B8FF')}${star(232, 428, 1)}<ellipse cx="262" cy="432" rx="14" ry="8" fill="#B9C3CF" stroke="${INK}" stroke-width="2.2"/>${branch(300, '#FFB547', 30)}${weed(334)}${star(358, 432, .8)}
 <circle cx="150" cy="200" r="3" fill="none" stroke="#FFFFFF" stroke-opacity=".7" stroke-width="1.5"/><circle cx="156" cy="182" r="2" fill="none" stroke="#FFFFFF" stroke-opacity=".7" stroke-width="1.4"/><circle cx="312" cy="230" r="3.5" fill="none" stroke="#FFFFFF" stroke-opacity=".7" stroke-width="1.5"/><circle cx="318" cy="210" r="2.2" fill="none" stroke="#FFFFFF" stroke-opacity=".7" stroke-width="1.4"/>
-<g transform="translate(46 86)"><circle r="11" fill="#FFFFFF" stroke="${INK}" stroke-width="2.2"/><path d="M-11 0a11 11 0 0 1 22 0z" fill="#FF7A6B"/><path d="M0 -11v22" stroke="#FFC94A" stroke-width="3.5"/></g></svg>`;
+</svg>`;
+    // 바닥 장식 (MY POOL 꾸미기): 장면 좌표 x 기준으로 놓는 조각
+    const wrapD = (vb, inner) => `<svg viewBox="${vb}" xmlns="http://www.w3.org/2000/svg">${inner}</svg>`;
+    scene.deco = (k, c) => {
+      if (k === 'weed') return { svg: wrapD('0 376 32 60', weed(10)), w: 32, top: 376, ox: 10 };
+      if (k === 'coral') return { svg: wrapD('0 386 34 50', branch(14, c || '#FF9EC4', 34)), w: 34, top: 386, ox: 14 };
+      if (k === 'shell') return { svg: wrapD('0 414 24 20', shell(12, c || '#FFD978')), w: 24, top: 414, ox: 12 };
+      if (k === 'star') return { svg: wrapD('0 414 28 30', star(14, 428, 1)), w: 28, top: 414, ox: 14 };
+      if (k === 'rock') return { svg: wrapD('0 422 32 20', `<ellipse cx="16" cy="432" rx="14" ry="8" fill="#B9C3CF" stroke="${INK}" stroke-width="2.2"/>`), w: 32, top: 422, ox: 16 };
+      if (k === 'ball') return { svg: wrapD('0 72 28 28', `<g transform="translate(14 86)"><circle r="11" fill="#FFFFFF" stroke="${INK}" stroke-width="2.2"/><path d="M-11 0a11 11 0 0 1 22 0z" fill="#FF7A6B"/><path d="M0 -11v22" stroke="#FFC94A" stroke-width="3.5"/></g>`), w: 28, top: 72, ox: 14 };
+      return null;
+    };
     let w2 = 'M0 8'; for (let x = 0; x < 390; x += 32.5) w2 += ' q16.25 -6 32.5 0';
     scene.sideSurface = `<svg viewBox="0 0 390 34" xmlns="http://www.w3.org/2000/svg"><path d="${w2} V34 H0 Z" fill="#8CCBFA" fill-opacity=".5"/><path d="${w2}" stroke="#FFFFFF" stroke-opacity=".7" stroke-width="1.6" fill="none"/></svg>`;
   }

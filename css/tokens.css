@@ -40,8 +40,19 @@
   96%  { transform: translateX(-200px) scaleX(-1); }
   100% { transform: translateX(-200px) scaleX(1); }
 }
+/* 우리 수영장: 공동 리프 산호초 사이를 왕복 */
+.reef-tank .reef-swimmer { animation: reeflap 8s ease-in-out infinite; }
+@keyframes reeflap {
+  0%   { transform: translate(-112px, 0) scaleX(1); }
+  24%  { transform: translate(0, 6px) scaleX(1); }
+  46%  { transform: translate(118px, 0) scaleX(1); }
+  50%  { transform: translate(118px, 0) scaleX(-1); }
+  74%  { transform: translate(0, 6px) scaleX(-1); }
+  96%  { transform: translate(-112px, 0) scaleX(-1); }
+  100% { transform: translate(-112px, 0) scaleX(1); }
+}
 @keyframes drift { from { transform: translate(0, 0); } to { transform: translate(14px, -8px); } }
 @media (prefers-reduced-motion: reduce) {
-  .side-scene .swimmer, .side-scene .drift { animation: none; }
+  .side-scene .swimmer, .side-scene .drift, .reef-tank .reef-swimmer { animation: none; }
   .side-scene .ghost { display: block; }
 }
