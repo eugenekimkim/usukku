@@ -1,7 +1,7 @@
-// 우수꾸 앱: 라우팅 · 상태 저장 · 상자 열기 · 시트 · 토스트
+// 우수꾸 앱: 라우팅 · 상태 저장 · 진주 받기 · 상점 · 시트 · 토스트
 (function () {
   const U = window.USUKKU, A = window.ART;
-  const KEY = 'usukku:v2';
+  const KEY = 'usukku:v3';
   const ROUTES = { splash: '00-0', intro: '00-0b', pick: '00', 'pool-pick': '00-2', home: '01', dress: '02', pool: '03', mypool: '04-2', 'mypool-side': '04-2', 'pool-set': '09', dex: '05', my: '06', menu: '07', notice: '08' };
   const MAIN = ['home', 'dress', 'pool', 'dex'];
 
@@ -34,7 +34,7 @@
     view.replaceChildren(s);
     const next = view.querySelector('.scroll'); if (next) next.scrollTop = top;
     phone.dataset.route = r;
-    document.title = `우수꾸 · ${{ splash: '시작', intro: '시작', pick: '캐릭터 선택', 'pool-pick': '수영장 선택', home: '오늘의 상자', dress: '꾸미기', pool: '우리 수영장', mypool: 'MY POOL', 'mypool-side': 'MY POOL', 'pool-set': '내 수영장 설정', dex: '바다 도감', my: '마이', menu: '전체 메뉴', notice: '공지사항' }[r]}`;
+    document.title = `우수꾸 · ${{ splash: '시작', intro: '시작', pick: '캐릭터 선택', 'pool-pick': '수영장 선택', home: '오늘의 진주', dress: '꾸미기', pool: '우리 수영장', mypool: 'MY POOL', 'mypool-side': 'MY POOL', 'pool-set': '내 수영장 설정', dex: '바다 도감', my: '마이', menu: '전체 메뉴', notice: '공지사항' }[r]}`;
     if (r === 'splash') { clearTimeout(splashTimer); splashTimer = setTimeout(() => { if (route === 'splash') ctx.go(st.onboarded ? 'home' : 'intro'); }, 1800); }
   }
   let splashTimer;
@@ -65,6 +65,19 @@
   function button(label, primary, fn) { const b = text('button', 'sbtn' + (primary ? ' primary' : ''), label); b.type = 'button'; b.addEventListener('click', fn); return b; }
 
   // ---------- 동작 ----------
+  // 진주로 사기
+  function buy(cat, it) {
+    const short = it.price - st.pearls;
+    sheet((sh) => {
+      sh.appendChild(el('div', 'art dex-art', it.svg));
+      sh.appendChild(text('div', 'sh-title', short > 0 ? `진주 ${short}개가 더 필요해요` : `${it.name}을(를) 살까요?`));
+      sh.appendChild(text('div', 'sh-sub', short > 0 ? `${it.name} · 진주 ${it.price}개 (지금 ${st.pearls}개) · 약 ${(short * 100).toLocaleString()}m 더 헤엄치면 돼요` : `진주 ${it.price}개를 써요 · 남는 진주 ${st.pearls - it.price}개`));
+      const a = el('div', 'sh-actions');
+      a.appendChild(button(short > 0 ? '닫기' : '취소', short > 0, closeSheet));
+      if (short <= 0) a.appendChild(button('사기', true, () => { st.pearls -= it.price; st.owned.push(cat + ':' + it.id); st.equip[cat] = it.id; closeSheet(); refresh(); toast(`${it.name} 착용!`); }));
+      sh.appendChild(a);
+    });
+  }
   const defaultName = () => `새벽반 ${U.furName(st.fur)}${U.animalName(st.kind)}`;
   const ACTIONS = {
     toast,
@@ -73,39 +86,33 @@
     setName(v) { st.name = v.trim() || defaultName(); st.nameEdited = !!v.trim(); save(); },
     setPool(i) { st.pool = i; refresh(); },
     finishOnboarding() { st.onboarded = true; save(); stack.length = 0; ctx.go('home'); toast(`${st.name}, 우수꾸에 온 걸 환영해요!`); },
-    openBox() {
-      if (st.boxOpened) { ctx.go('dress'); return; }
+    sync() {
+      if (st.synced) { ctx.go('dress'); return; }
+      const n = U.todayPearls();
       sheet((sh) => {
         sh.classList.add('box-open');
-        const chest = el('div', 'art big-chest shake', window.PROPS.item.chest); sh.appendChild(chest);
-        const title = text('div', 'sh-title', '두근두근…'); sh.appendChild(title);
-        const sub = text('div', 'sh-sub', '오늘 기록으로 상자를 여는 중'); sh.appendChild(sub);
+        const clam = el('div', 'art big-chest shake', window.PROPS.item.clam); sh.appendChild(clam);
+        const title = text('div', 'sh-title', '워치에서 기록을 받는 중…'); sh.appendChild(title);
+        const sub = text('div', 'sh-sub', `오늘 ${U.TODAY.m.toLocaleString()}m · ${U.TODAY.min}분`); sh.appendChild(sub);
         const actions = el('div', 'sh-actions'); sh.appendChild(actions);
-        // 오늘 기록은 자유형 위주 → 물고기 중 한 마리 (참치는 드물게)
-        const r = Math.random();
-        const kind = r < 0.25 ? 'tuna' : r < 0.65 ? 'mackerel' : 'clownfish';
-        const isNew = !st.friends.includes(kind);
-        const [name] = U.SEA[kind];
         setTimeout(() => {
-          chest.remove();
-          const catchEl = el('div', 'catch');
-          catchEl.appendChild(el('div', 'art catch-art', A.sea(kind)));
-          if (isNew) catchEl.appendChild(text('div', 'catch-new', 'NEW'));
-          sh.insertBefore(catchEl, title);
-          title.textContent = isNew ? `${name}를 처음 만났어요!` : `${name}를 또 만났어요!`;
-          sub.textContent = isNew ? '바다 도감에 새로 등록됐어요' : '자유형 800m · 친밀도가 올라갔어요';
-          actions.appendChild(button(isNew ? '도감에 넣기' : '받기', true, () => {
-            st.boxOpened = true; st.lastCatch = kind;
-            if (isNew) st.friends.push(kind);
-            closeSheet(); refresh(); toast(isNew ? `${name}가 바다 도감에 들어왔어요` : `${name}와 더 친해졌어요`);
+          clam.classList.remove('shake'); clam.classList.add('pop');
+          title.textContent = `진주 ${n}개를 받았어요!`;
+          sub.textContent = `${U.TODAY.m.toLocaleString()}m → 진주 ${n - 5}개 · 오늘 첫 수영 보너스 5개`;
+          actions.appendChild(button('좋아요', true, () => {
+            st.pearls += n; st.synced = true;
+            closeSheet(); refresh(); toast(`내 진주 ${st.pearls}개 · 우리 수영장 바닷길에 ${(U.TODAY.m / 1000).toFixed(2)}km를 보탰어요`);
           }));
-        }, 1100);
+        }, 1000);
       }, { center: true, sticky: true });
     },
     setTab(k) { st.tab = k; refresh(); },
     equip(cat, id) {
       const it = U.ITEMS[cat].find((x) => x.id === id);
-      if (!st.owned.includes(cat + ':' + id)) { toast(`🔒 ${it.name} · ${it.tag}`); return; }
+      if (!st.owned.includes(cat + ':' + id)) {
+        if (it.reward) { toast(`${it.name}은(는) ${it.reward} 보상이에요`); return; }
+        buy(cat, it); return;
+      }
       // 오리발은 한 번 더 누르면 벗기
       if (st.equip[cat] === id) { if (cat === 'fin') { st.equip.fin = null; refresh(); toast('오리발을 벗었어요'); } return; }
       st.equip[cat] = id; refresh(); toast(`${it.name} 착용!`);
@@ -136,38 +143,26 @@
       refresh(); toast(p[0] === 'rock' ? '바위를 치웠어요' : '보관함에 다시 넣었어요');
     },
     // 내 수영장 설정
-    poolSlot(i) { st.slot = i; if (st.slots[i] != null) st.pool = st.slots[i]; refresh(); },
-    removeSlot() {
-      sheet((sh) => {
-        sh.appendChild(text('div', 'sh-title', '이 수영장을 지울까요?'));
-        sh.appendChild(text('div', 'sh-sub', `${U.POOLS[st.slots[1]][0]}을(를) 내 수영장에서 지워요.`));
-        const a = el('div', 'sh-actions');
-        a.appendChild(button('취소', false, closeSheet));
-        a.appendChild(button('지우기', true, () => { st.slots[1] = null; st.slot = 0; st.pool = st.slots[0]; closeSheet(); refresh(); toast('수영장을 지웠어요'); }));
-        sh.appendChild(a);
-      }, { center: true });
-    },
     locate() {
       // 아티팩트 안에서는 실제 위치를 쓸 수 없어 데모 위치로 대신해요
       toast('현재 위치를 확인하는 중…');
       setTimeout(() => { st.located = true; refresh(); toast('현재 위치 · 성내동 근처'); }, 700);
     },
     choosePool(i) {
-      const slot = st.slot || 0;
-      if (st.slots[slot] === i) return;
-      if (st.slots.includes(i)) { toast('이미 등록한 수영장이에요'); return; }
+      if (st.pool === i) return;
+      if (st.poolChanged === U.monthKey()) { toast(`이번 달에 이미 바꿨어요 · ${U.nextMonthLabel()}부터 바꿀 수 있어요`); return; }
       const [name, , , dong] = U.POOLS[i];
       sheet((sh) => {
         sh.appendChild(text('div', 'sh-title', `${dong} ${name}으로 바꿀까요?`));
-        sh.appendChild(text('div', 'sh-sub', '우리 수영장 · 공동 리프가 새 수영장으로 바뀌어요. 모은 친구와 아이템은 그대로예요.'));
+        sh.appendChild(text('div', 'sh-sub', `바꾸면 ${U.nextMonthLabel()}까지 다시 바꿀 수 없어요. 이미 헤엄친 거리는 ${U.POOLS[st.pool][0]} 바닷길에 남고, 진주와 아이템은 그대로예요.`));
         const a = el('div', 'sh-actions');
         a.appendChild(button('취소', false, closeSheet));
-        a.appendChild(button('바꾸기', true, () => { st.slots[slot] = i; st.pool = i; closeSheet(); refresh(); toast(`내 수영장이 ${name}으로 바뀌었어요`); }));
+        a.appendChild(button('바꾸기', true, () => { st.pool = i; st.poolChanged = U.monthKey(); closeSheet(); refresh(); toast(`내 수영장이 ${name}으로 바뀌었어요`); }));
         sh.appendChild(a);
       }, { center: true });
     },
     verify() {
-      const i = st.slots[st.slot || 0];
+      const i = st.pool;
       sheet((sh) => {
         sh.classList.add('box-open');
         sh.appendChild(el('div', 'art verify-art float', A.seal));
@@ -183,7 +178,7 @@
     dexFilter(c) { st.dexFilter = c; refresh(); },
     dexDetail(k) {
       const found = st.friends.includes(k);
-      const [name, cat, how] = U.SEA[k];
+      const [name, cat] = U.SEA[k]; const how = U.seaHow(k);
       sheet((sh) => {
         sh.appendChild(el('div', 'art dex-art' + (found ? '' : ' unknown'), found ? A.sea(k) : A.seaSilhouette(k)));
         sh.appendChild(text('div', 'sh-title', found ? name : '아직 못 만난 친구'));

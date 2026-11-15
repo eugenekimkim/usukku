@@ -29,62 +29,82 @@
   // 바닥 장식 기본 배치 (피그마 시안과 같은 자리)
   const DEFAULT_PLACED = [['weed', 40], ['coral', 78, '#FF9EC4'], ['weed', 128], ['shell', 168, '#FFD978'], ['shell', 192, '#FFB8C8'], ['shell', 212, '#C9B8FF'], ['star', 232], ['rock', 262], ['coral', 300, '#FFB547'], ['weed', 334], ['star', 358], ['ball', 46]];
   const I = P.item;
+  // 꾸미기 아이템: price = 진주로 사기, reward = 진주로 못 사고 얻는 방법
   const ITEMS = {
     cap: [
-      { id: 'basic', name: '기본 수모', tag: '기본', svg: I.cap('#1F8BFF'), cap: { color: '#1F8BFF' } },
-      { id: 'dots', name: '물방울 수모', tag: '기본', svg: I.cap('#FF9EC4', I.capDots), cap: { color: '#FF9EC4', deco: 'dots' } },
-      { id: 'whale', name: '고래 수모', tag: '접영 · 반짝이', tone: 'shine', svg: I.cap('#3B6FD8', I.capWhale), cap: { color: '#3B6FD8', deco: 'whale' } },
-      { id: 'rainbow', name: '무지개 수모', tag: '혼영 · 무지개', tone: 'rainbow', svg: I.cap('#0F2A43', I.capRainbow), cap: { color: '#0F2A43', deco: 'rainbow' } },
-      { id: 'team', name: '중급반 팀 수모', tag: '팀 한정', tone: 'limited', svg: I.cap('#3FA65A', I.capTeam), cap: { color: '#3FA65A', deco: 'team' } },
-      { id: 'sun', name: '일출 수모', tag: '새벽 10회 달성 시', svg: I.cap('#FFB547', I.capSun), cap: { color: '#FFB547', deco: 'sun' } },
+      { id: 'basic', name: '기본 수모', price: 0, svg: I.cap('#1F8BFF'), cap: { color: '#1F8BFF' } },
+      { id: 'dots', name: '물방울 수모', price: 80, svg: I.cap('#FF9EC4', I.capDots), cap: { color: '#FF9EC4', deco: 'dots' } },
+      { id: 'whale', name: '고래 수모', price: 120, tone: 'shine', svg: I.cap('#3B6FD8', I.capWhale), cap: { color: '#3B6FD8', deco: 'whale' } },
+      { id: 'rainbow', name: '무지개 수모', price: 150, tone: 'rainbow', svg: I.cap('#0F2A43', I.capRainbow), cap: { color: '#0F2A43', deco: 'rainbow' } },
+      { id: 'team', name: '중급반 팀 수모', reward: '강습반 팀 목표', tone: 'limited', svg: I.cap('#3FA65A', I.capTeam), cap: { color: '#3FA65A', deco: 'team' } },
+      { id: 'sun', name: '등대섬 수모', reward: '등대섬 도착', tone: 'limited', svg: I.cap('#FFB547', I.capSun), cap: { color: '#FFB547', deco: 'sun' } },
     ],
     goggle: [
-      { id: 'basic', name: '기본 수경', tag: '기본', svg: I.goggle('#FF7A6B'), goggle: null },
-      { id: 'otter', name: '해달 수경', tag: '배영 · 반짝이', tone: 'shine', svg: I.goggle('#1BA9A0'), goggle: '#1BA9A0' },
-      { id: 'navy', name: '남색 수경', tag: '기본', svg: I.goggle('#1B22A6'), goggle: '#1B22A6' },
-      { id: 'pink', name: '분홍 수경', tag: '기본', svg: I.goggle('#FF9EC4'), goggle: '#FF9EC4' },
-      { id: 'gold', name: '금빛 수경', tag: '접영 1km 달성 시', svg: I.goggle('#FFB547'), goggle: '#FFB547' },
-      { id: 'collab', name: '콜라보 수경', tag: '브랜드 한정', tone: 'limited', svg: I.goggle('#456AFF'), goggle: '#456AFF' },
+      { id: 'basic', name: '기본 수경', price: 0, svg: I.goggle('#FF7A6B'), goggle: null },
+      { id: 'otter', name: '청록 수경', price: 100, tone: 'shine', svg: I.goggle('#1BA9A0'), goggle: '#1BA9A0' },
+      { id: 'navy', name: '남색 수경', price: 80, svg: I.goggle('#1B22A6'), goggle: '#1B22A6' },
+      { id: 'pink', name: '분홍 수경', price: 80, svg: I.goggle('#FF9EC4'), goggle: '#FF9EC4' },
+      { id: 'gold', name: '금빛 수경', reward: '고래섬 도착', tone: 'limited', svg: I.goggle('#FFB547'), goggle: '#FFB547' },
+      { id: 'collab', name: '콜라보 수경', reward: '수영장 대결', tone: 'limited', svg: I.goggle('#456AFF'), goggle: '#456AFF' },
     ],
     suit: [
-      { id: 'basic', name: '처음 옷', tag: '기본', svg: I.suit('#3ED3C9'), suit: null },
-      { id: 'mint', name: '민트 줄무늬', tag: '기본', svg: I.suit('#3ED3C9'), suit: { color: '#3ED3C9' } },
-      { id: 'coral', name: '산호 수영복', tag: '기본', svg: I.suit('#FF7A6B'), suit: { color: '#FF7A6B' } },
-      { id: 'navy', name: '남색 수영복', tag: '기본', svg: I.suit('#1E3A8A', '#9EB3FF'), suit: { color: '#1E3A8A', stripe: '#9EB3FF' } },
-      { id: 'collab', name: '콜라보 수영복', tag: '브랜드 한정', tone: 'limited', svg: I.suit('#456AFF', '#FFBFEC'), suit: { color: '#456AFF', stripe: '#FFBFEC' } },
+      { id: 'basic', name: '처음 옷', price: 0, svg: I.suit('#3ED3C9'), suit: null },
+      { id: 'mint', name: '민트 줄무늬', price: 0, svg: I.suit('#3ED3C9'), suit: { color: '#3ED3C9' } },
+      { id: 'coral', name: '산호 수영복', price: 150, svg: I.suit('#FF7A6B'), suit: { color: '#FF7A6B' } },
+      { id: 'navy', name: '남색 수영복', price: 180, svg: I.suit('#1E3A8A', '#9EB3FF'), suit: { color: '#1E3A8A', stripe: '#9EB3FF' } },
+      { id: 'collab', name: '콜라보 수영복', reward: '수영장 대결', tone: 'limited', svg: I.suit('#456AFF', '#FFBFEC'), suit: { color: '#456AFF', stripe: '#FFBFEC' } },
     ],
     fin: [
-      { id: 'basic', name: '노랑 오리발', tag: '기본', svg: I.fin('#FFC94A'), fin: '#FFC94A' },
-      { id: 'blue', name: '파랑 오리발', tag: '기본', svg: I.fin('#4DA3FF'), fin: '#4DA3FF' },
-      { id: 'pink', name: '분홍 오리발', tag: '자유형 5km 달성 시', svg: I.fin('#FF9EC4'), fin: '#FF9EC4' },
+      { id: 'basic', name: '노랑 오리발', price: 0, svg: I.fin('#FFC94A'), fin: '#FFC94A' },
+      { id: 'blue', name: '파랑 오리발', price: 120, svg: I.fin('#4DA3FF'), fin: '#4DA3FF' },
+      { id: 'pink', name: '분홍 오리발', price: 200, svg: I.fin('#FF9EC4'), fin: '#FF9EC4' },
     ],
   };
+  // 우리 수영장 바닷길: 섬 다섯 개. 섬 간격 = 멤버 1명당 2km
+  const ISLANDS = ['모래섬', '산호섬', '해초섬', '등대섬', '고래섬'];
+  const KM_PER_MEMBER = 2;
+  const ROUTE_AT = 3.6; // 데모: 세 번째 섬을 지나 등대섬으로 가는 중
+  function route(pi, extraKm = 0) {
+    const gap = POOLS[pi][2] * KM_PER_MEMBER;
+    const km = gap * ROUTE_AT + extraKm;
+    const at = km / gap; const next = Math.min(ISLANDS.length, Math.floor(at) + 1);
+    return { gap, km, at, next, nextName: ISLANDS[next - 1], left: next * gap - km };
+  }
+  // 바다 친구: [이름, 분류, 만나는 곳] — 우리 수영장이 그 섬에 닿으면 멤버 모두 만나요
   const SEA = {
-    clownfish: ['흰동가리', '물고기', '자유형을 짧게 · 가볍게 하면 만나요'], mackerel: ['고등어', '물고기', '자유형을 오래 · 꾸준히 하면 만나요'], tuna: ['참치', '물고기', '자유형을 빠르게 하면 만나요'],
-    turtle: ['바다거북', '거북·해달', '평영을 하면 만나요'], otter: ['해달', '거북·해달', '배영을 하면 만나요'], dolphin: ['돌고래', '고래', '여러 영법을 섞은 날 만나요'],
-    humpback: ['혹등고래', '고래', '접영 500m를 넘기면 만나요'], octopus: ['문어', '기타', '이벤트 기간에 만나요'], bluewhale: ['대왕고래', '고래', '접영 마스터가 되면 만나요'],
+    clownfish: ['흰동가리', '물고기', '모래섬'], mackerel: ['고등어', '물고기', '등대섬'], tuna: ['참치', '물고기', '고래섬'],
+    turtle: ['바다거북', '거북·해달', '산호섬'], otter: ['해달', '거북·해달', '해초섬'], dolphin: ['돌고래', '고래', '등대섬'],
+    humpback: ['혹등고래', '고래', '고래섬'], octopus: ['문어', '기타', '산호섬'], bluewhale: ['대왕고래', '고래', '고래섬'],
   };
+  const seaHow = (k) => `우리 수영장이 ${SEA[k][2]}에 닿으면 만나요`;
   const DEX_ORDER = ['clownfish', 'mackerel', 'tuna', 'turtle', 'otter', 'dolphin', 'humpback', 'octopus', 'bluewhale'];
   const NOTICES = [
-    ['이벤트', '11월 수영장 대결 규칙과 보상 안내', '2026.10.30', '11월 한 달 동안 같은 수영장 멤버들의 거리를 모아 이웃 수영장과 겨뤄요. 이기면 멤버 전원에게 한정 튜브를 드려요.'],
-    ['업데이트', '바다 도감에 고래 3종이 추가됐어요', '2026.10.28', '혹등고래, 범고래, 대왕고래를 접영 기록으로 만날 수 있어요.'],
+    ['업데이트', '진주 상점이 열렸어요', '2026.11.12', '워치 기록이 들어오면 100m마다 진주 1개를 받아요. 그날 첫 수영에는 진주 5개를 더 드려요. 모은 진주로 수모 · 수경 · 수영복을 살 수 있어요.'],
+    ['이벤트', '11월 수영장 대결 규칙과 보상 안내', '2026.10.30', '11월 한 달 동안 같은 수영장 멤버들의 거리를 모아 이웃 수영장과 겨뤄요. 이기면 멤버 전원에게 콜라보 수경을 드려요.'],
+    ['공지', '우리 수영장 바닷길 안내', '2026.10.28', '수영장 멤버가 헤엄친 거리를 모두 합쳐 섬을 향해 가요. 섬 간격은 멤버 1명당 2km예요. 섬에 닿으면 그달 인증하고 수영한 멤버 모두 진주 30개와 새 바다 친구를 만나요.'],
     ['공지', '갤럭시워치 연동 베타를 시작해요', '2026.10.24', '마이 > 워치 연동에서 갤럭시워치를 연결할 수 있어요.'],
-    ['공지', '목록에 없는 수영장을 직접 등록할 수 있어요', '2026.10.20', '수영장 선택 화면 아래 직접 등록하기를 눌러 주세요.'],
-    ['이벤트', '산호 꾸미기 사진 공모전 당첨자 발표', '2026.10.15', '참여해 주신 모든 분께 감사드려요. 당첨자는 알림으로 안내드렸어요.'],
+    ['공지', '수영장은 한 달에 한 번 바꿀 수 있어요', '2026.10.20', '내 수영장은 한 곳만 등록해요. 한 번 바꾸면 그달에는 다시 바꿀 수 없어요. 이미 헤엄친 거리는 이전 수영장 바닷길에 남아요.'],
     ['업데이트', '음파 표정 스티커가 추가됐어요', '2026.10.08', '숨 참는 친구들의 음파 표정을 스티커로 쓸 수 있어요.'],
   ];
 
   const DEFAULT_STATE = {
     onboarded: false, kind: 'rabbit', fur: '#FFFFFF', name: '새벽반 흰토끼', nameEdited: false, pool: 0,
     equip: { cap: 'basic', goggle: 'basic', suit: 'basic', fin: null },
-    owned: ['cap:basic', 'cap:dots', 'cap:whale', 'cap:rainbow', 'cap:team', 'goggle:basic', 'goggle:navy', 'goggle:pink', 'suit:basic', 'suit:mint', 'suit:coral', 'suit:navy', 'fin:basic', 'fin:blue'],
-    friends: ['clownfish', 'mackerel', 'turtle', 'otter', 'dolphin', 'octopus', 'jellyfish', 'puffer', 'starfish', 'crab', 'shrimp', 'seahorse'],
-    follow: ['clownfish', 'mackerel', 'turtle'],
-    boxOpened: false, tab: 'cap', dexFilter: '전체', noticeFilter: '전체', openNotice: -1, read: [],
+    owned: ['cap:basic', 'cap:dots', 'goggle:basic', 'goggle:navy', 'suit:basic', 'suit:mint', 'fin:basic'],
+    pearls: 186, synced: false,
+    friends: ['clownfish', 'turtle', 'octopus', 'otter', 'jellyfish', 'puffer', 'starfish', 'crab', 'shrimp', 'seahorse'],
+    follow: ['clownfish', 'turtle'],
+    tab: 'cap', dexFilter: '전체', noticeFilter: '전체', openNotice: -1, read: [],
     tray: { coral: 2, weed: 1, shell: 3, ball: 1, star: 2 }, decorate: false,
     placed: DEFAULT_PLACED.map((p) => p.slice()),
-    slots: [0, null], slot: 0, verified: { 0: true }, located: false,
+    poolChanged: null, verified: { 0: true }, located: false,
   };
+  // 오늘 수영 기록 (데모) · 진주 계산
+  const TODAY = { m: 1250, min: 42, pace: "3'22\"" };
+  const PEARL_PER = 100, FIRST_BONUS = 5;
+  const todayPearls = () => Math.floor(TODAY.m / PEARL_PER) + FIRST_BONUS;
+  const monthKey = (d = new Date()) => `${d.getFullYear()}-${d.getMonth() + 1}`;
+  const nextMonthLabel = (d = new Date()) => `${d.getMonth() === 11 ? 1 : d.getMonth() + 2}월 1일`;
 
   const furName = (hex) => (FURS.find((f) => f[0] === hex) || [0, ''])[1];
   const animalName = (k) => ANIMALS.find((a) => a[0] === k)[1];
@@ -238,6 +258,29 @@
   function iconBtn(parent, svg, w, fn, label) { const b = art(parent, svg, w); tap(b, fn, label); return b; }
   const tagTone = (tone) => ({ shine: [G.shine, C.primary], rainbow: [G.rainbow, C.ink], limited: [C.pinkL, C.coral] }[tone] || [C.line, C.sub]);
 
+  // 진주 수 표시 (아이콘 + 숫자)
+  function pearlTag(parent, n, o = {}) {
+    const p = al(parent, 'H', { gap: 3, pad: o.pad || [3, 8], fill: o.fill || C.paleBlue, radius: 999, align: 'CENTER' });
+    art(p, P.icon.pearl, o.icon || 12); txt(p, typeof n === 'number' ? n.toLocaleString() : n, o.k || 'L', o.color || C.ink);
+    return p;
+  }
+  // 우리 수영장 바닷길: 왼쪽 출발 → 오른쪽 고래섬, 지나온 섬은 진하게
+  function routeSvg(at, w = 318) {
+    const x0 = 16, step = (w - 34) / ISLANDS.length, y = 34;
+    const px = x0 + step * Math.min(at, ISLANDS.length);
+    let g = `<rect x="0" y="12" width="${w}" height="46" rx="14" fill="#BFE6FF"/><path d="M8 22c10-4 20 4 30 0s20-4 30 0 20 4 30 0 20-4 30 0 20 4 30 0 20-4 30 0 20 4 30 0 20-4 30 0 20 4 30 0 20-4 30 0" stroke="#FFFFFF" stroke-opacity=".7" stroke-width="2" fill="none"/>`;
+    g += `<path d="M${x0} ${y}H${w - 18}" stroke="#7FB6E8" stroke-width="2.5" stroke-dasharray="2 6" stroke-linecap="round"/><path d="M${x0} ${y}H${px}" stroke="#456AFF" stroke-width="3.5" stroke-linecap="round"/>`;
+    g += `<circle cx="${x0}" cy="${y}" r="5" fill="#FFFFFF" stroke="#456AFF" stroke-width="2.5"/>`;
+    ISLANDS.forEach((n, i) => {
+      const x = x0 + step * (i + 1), done = at >= i + 1;
+      g += `<path d="M${x - 15} ${y + 6}c3-12 9-17 15-17s12 5 15 17z" fill="${done ? '#F4D58A' : '#E9F2FA'}" stroke="${done ? '#D8AE52' : '#B9CCE0'}" stroke-width="1.5"/>`;
+      g += `<path d="M${x - 2} ${y - 9}v-9" stroke="${done ? '#3FA65A' : '#B9CCE0'}" stroke-width="2" stroke-linecap="round"/><path d="M${x - 2} ${y - 18}c-5-1-8 1-9 4M${x - 2} ${y - 18}c5-1 8 1 9 4" stroke="${done ? '#3FA65A' : '#B9CCE0'}" stroke-width="2" stroke-linecap="round" fill="none"/>`;
+      g += `<text x="${x}" y="${y + 38}" text-anchor="middle" font-size="11" font-weight="700" fill="${done ? '#0F2A43' : '#9DB2C7'}">${n}</text>`;
+    });
+    g += `<g transform="translate(${px - 9} ${y - 22})"><path d="M9 0v16" stroke="#0F2A43" stroke-width="2"/><path d="M9 1h11l-4 4 4 4H9z" fill="#FF7A6B"/><circle cx="9" cy="20" r="5" fill="#456AFF" stroke="#FFFFFF" stroke-width="2"/></g>`;
+    return `<svg viewBox="0 0 ${w} 78" xmlns="http://www.w3.org/2000/svg" font-family="inherit">${g}</svg>`;
+  }
+
   const S = {};
 
   // ---------- 00-0 스플래시 ----------
@@ -349,7 +392,7 @@
     return s;
   };
 
-  // ---------- 01 오늘의 상자 ----------
+  // ---------- 01 오늘의 진주 ----------
   S['01'] = (ctx) => {
     const st = ctx.st;
     const s = screen('01');
@@ -357,43 +400,42 @@
     const h = al(b, 'H', { justify: 'SPACE_BETWEEN', align: 'CENTER', fillW: true });
     const hl = al(h, 'V', { gap: 2 }); txt(hl, '10월 22일 목요일 · 새벽 6:40', 'CR', C.sub); txt(hl, '오늘의 수영 완료!', 'T', C.ink);
     const hr = al(h, 'H', { gap: 8, align: 'CENTER' });
-    const stc = al(hr, 'H', { gap: 4, pad: [6, 10], fill: C.soft, radius: 999, align: 'CENTER' }); art(stc, P.icon.wave(), 16); txt(stc, '4주 연속', 'CM', C.primary);
+    pearlTag(hr, st.pearls, { k: 'CM', icon: 16, pad: [6, 10], fill: C.card });
     if (ctx.live) { const av = al(hr, 'H', { fill: C.sky, radius: 18, w: 36, h: 36, align: 'CENTER', justify: 'CENTER', clip: true }); art(av, me(ctx), 38).style.marginTop = '10px'; tap(av, () => ctx.go('menu'), '전체 메뉴'); }
-    const sum = al(b, 'V', { gap: 14, pad: [18, 18], fill: C.card, radius: 20, fillW: true });
+    const sum = al(b, 'V', { gap: 12, pad: [18, 18], fill: C.card, radius: 20, fillW: true });
     const stats = al(sum, 'H', { justify: 'SPACE_BETWEEN', fillW: true });
-    [['거리', '1,250m', C.ink], ['시간', '42분', C.ink], ['효율', '+3 향상', C.primary]].forEach(([l, v, c]) => { const x = al(stats, 'V', { gap: 2, grow: true }); txt(x, l, 'CR', C.sub); txt(x, v, 'H', c); });
-    const segs = [['자유형', 800, '#4DA3FF'], ['배영', 250, '#B07A52'], ['평영', 200, '#3FA65A']];
-    const bar = al(sum, 'H', { gap: 3, fillW: true, h: 10 }); segs.forEach(([, m, c]) => { const g = al(bar, 'H', { fill: c, radius: 5, grow: m }); g.style.alignSelf = 'stretch'; });
-    const leg = al(sum, 'H', { gap: 14, fillW: true }); segs.forEach(([n, m, c]) => { const li = al(leg, 'H', { gap: 6, align: 'CENTER' }); dot(li, 8, c); txt(li, `${n} ${m}m`, 'CR', C.sub); });
-    const opened = ctx.live && st.boxOpened;
-    const hero = al(b, 'V', { name: 'today-box', gap: 8, pad: [18, 20, 20, 20], fill: G.special, radius: 24, align: 'CENTER', fillW: true });
-    pill(hero, '새벽 수영 한정', C.pink, C.ink, 'L', [5, 10]);
-    const chest = art(hero, P.item.chest, 130); if (ctx.live && !opened) chest.classList.add('wiggle');
-    if (opened) chest.style.opacity = 0.45;
-    txt(hero, opened ? '오늘의 상자를 열었어요' : '오늘의 상자가 도착했어요', 'H', C.ink);
-    txt(hero, opened ? '내일 수영하면 새 상자가 와요' : (ctx.live ? '오늘 기록(자유형 위주)으로 물고기 한 마리가 들어 있어요' : '오늘 기록으로 3개의 아이템이 들어 있어요'), 'CR', C.sub);
-    if (ctx.live && !opened) tap(hero, () => ctx.act('openBox'), '상자 열기');
-    if (opened) {
-      // 오늘 만난 물고기 한 마리
-      const k = st.lastCatch || 'mackerel';
-      txt(b, '오늘 만난 친구', 'CM', C.sub);
-      const card = al(b, 'H', { gap: 14, pad: [14, 16], fill: C.card, radius: 20, align: 'CENTER', fillW: true });
-      const ho = al(card, 'H', { fill: '#E8F4FF', radius: 36, w: 72, h: 72, align: 'CENTER', justify: 'CENTER' }); art(ho, A.sea(k), 64);
-      const col = al(card, 'V', { gap: 3, grow: true }); txt(col, SEA[k][0], 'H', C.ink); txt(col, SEA[k][2], 'CR', C.sub);
-      art(card, P.icon.chev(), 18);
-      tap(card, () => ctx.act('dexDetail', k), SEA[k][0] + ' 보기');
-    } else {
-      txt(b, ctx.live ? '오늘 나올 수 있는 친구' : '상자 속 미리보기', 'CM', C.sub);
-      const items = al(b, 'H', { gap: 10, fillW: true });
-      const preview = ctx.live
-        ? [['clownfish', '자유형 · 짧게', C.soft, C.primary], ['mackerel', '자유형 · 오래', C.soft, C.primary], ['tuna', '드물게 · 빠르게', G.shine, C.primary]].map(([k, tag, tf, tc]) => [st.friends.includes(k) ? A.sea(k) : A.seaSilhouette(k), st.friends.includes(k) ? SEA[k][0] : '???', tag, tf, tc])
-        : [[A.school(), '고등어 떼', '자유형 · 기본', C.line, C.sub], [A.sea('otter', true), '해달 수경', '배영 · 반짝이', G.shine, C.primary], [P.item.sunrise, '일출 배경', '새벽 · 한정', C.pinkL, C.coral]];
-      preview.forEach(([svg, n, tag, tf, tc]) => {
-        const c = al(items, 'V', { gap: 6, pad: [12, 8], fill: C.card, radius: 16, align: 'CENTER', grow: true });
-        art(c, svg, 44); txt(c, n, 'CM', n === '???' ? C.mute : C.ink); pill(c, tag, tf, tc);
-      });
-    }
-    cta(b, opened ? '꾸미러 가기' : '상자 열기', () => (opened ? ctx.go('dress') : ctx.act('openBox')));
+    [['거리', TODAY.m.toLocaleString() + 'm', C.ink], ['시간', TODAY.min + '분', C.ink], ['100m 평균', TODAY.pace, C.primary]].forEach(([l, v, c]) => { const x = al(stats, 'V', { gap: 2, grow: true }); txt(x, l, 'CR', C.sub); txt(x, v, 'H', c); });
+    const wk = al(sum, 'H', { gap: 6, align: 'CENTER', fillW: true }); art(wk, P.icon.wave(), 16); txt(wk, '이번 주 3번째 수영 · 4주 연속 기록 중', 'CM', C.primary);
+    const got = ctx.live && st.synced;
+    const n = todayPearls();
+    const hero = al(b, 'V', { name: 'today-pearl', gap: 8, pad: [18, 20, 20, 20], fill: G.special, radius: 24, align: 'CENTER', fillW: true });
+    pill(hero, 'Apple Watch 기록', '#FFFFFF', C.primary, 'L', [5, 10]);
+    const clam = art(hero, P.item.clam, 130); if (ctx.live && !got) clam.classList.add('wiggle');
+    txt(hero, got ? `진주 ${n}개를 받았어요` : '오늘 기록이 도착했어요', 'H', C.ink);
+    const br = al(hero, 'H', { gap: 6, align: 'CENTER' });
+    pearlTag(br, `${TODAY.m.toLocaleString()}m → ${Math.floor(TODAY.m / PEARL_PER)}`, { fill: '#FFFFFF' });
+    pearlTag(br, `첫 수영 +${FIRST_BONUS}`, { fill: '#FFFFFF', color: C.coral });
+    txt(hero, got ? '내일 또 헤엄치면 진주가 쌓여요' : '100m마다 진주 1개 · 그날 첫 수영은 보너스', 'CR', C.sub);
+    if (ctx.live && !got) tap(hero, () => ctx.act('sync'), '진주 받기');
+    // 우리 수영장 바닷길에 보탠 거리
+    const r = route(st.pool, got ? TODAY.m / 1000 : 0);
+    const rc = al(b, 'V', { gap: 8, pad: [14, 16], fill: C.card, radius: 20, fillW: true });
+    const rt = al(rc, 'H', { justify: 'SPACE_BETWEEN', align: 'CENTER', fillW: true });
+    txt(rt, got ? `우리 수영장 바닷길에 ${(TODAY.m / 1000).toFixed(2)}km를 보탰어요` : '우리 수영장 바닷길', 'BM', C.ink); art(rt, P.icon.chev(), 18);
+    art(rc, routeSvg(r.at, 310), 310);
+    txt(rc, `${r.nextName}까지 ${Math.ceil(r.left)}km · 섬에 닿으면 모두 진주 30개`, 'CR', C.sub);
+    tap(rc, () => ctx.go('pool'), '우리 수영장 바닷길');
+    // 진주로 살 수 있는 것
+    txt(b, '진주로 살 수 있어요', 'CM', C.sub);
+    const items = al(b, 'H', { gap: 10, fillW: true });
+    [['cap', 'whale'], ['goggle', 'otter'], ['fin', 'blue']].forEach(([cat, id]) => {
+      const it = itemOf(cat, id); const own = st.owned.includes(cat + ':' + id);
+      const c = al(items, 'V', { gap: 6, pad: [12, 8], fill: C.card, radius: 16, align: 'CENTER', grow: true });
+      art(c, it.svg, 44); txt(c, it.name, 'CM', C.ink);
+      if (own) pill(c, '보유', C.soft, C.primary); else pearlTag(c, it.price, { fill: st.pearls >= it.price ? C.soft : '#F3F6F9', color: st.pearls >= it.price ? C.primary : C.mute });
+      tap(c, () => { ctx.act('setTab', cat); ctx.go('dress'); }, it.name);
+    });
+    cta(b, got ? '진주 쓰러 가기' : '진주 받기', () => (got ? ctx.go('dress') : ctx.act('sync')));
     tabBar(s, '홈');
     return s;
   };
@@ -407,7 +449,7 @@
     const h = al(b, 'H', { justify: 'SPACE_BETWEEN', align: 'CENTER', fillW: true }); txt(h, '꾸미기', 'T', C.ink);
     const hr = al(h, 'H', { gap: 6, align: 'CENTER' });
     if (ctx.live) tap(pill(hr, 'MY POOL', C.navy, '#FFFFFF', 'CM', [6, 10]), () => ctx.go('mypool'), 'MY POOL로 가기');
-    pill(hr, `보관함 ${ctx.live ? st.owned.length : 24}`, C.soft, C.primary, 'CM', [6, 10]);
+    pearlTag(hr, st.pearls, { k: 'CM', icon: 16, pad: [6, 10], fill: C.card });
     const stage = al(b, 'V', { name: 'stage', gap: 10, pad: [20, 16, 16, 16], fill: C.sky, radius: 24, align: 'CENTER', fillW: true });
     const row = al(stage, 'H', { gap: 6, align: 'MAX' });
     art(row, me(ctx), 100).classList.add('pop');
@@ -427,11 +469,13 @@
       });
     } else {
       cards = ITEMS[tab].map((it) => {
-        const owned = !ctx.live || st.owned.includes(tab + ':' + it.id);
-        const locked = ctx.live ? !owned : it.id === 'sun';
+        const owned = st.owned.includes(tab + ':' + it.id);
         const on = st.equip[tab] === it.id;
-        const [tf, tc] = on ? [C.btn, '#FFFFFF'] : (locked ? [C.line, C.mute] : tagTone(it.tone));
-        return { svg: it.svg, name: it.name, tag: on ? '착용 중' : it.tag, tf, tc, sel: on, locked, fn: () => ctx.act('equip', tab, it.id) };
+        const base = { svg: it.svg, name: it.name, sel: on, fn: () => ctx.act('equip', tab, it.id) };
+        if (on) return { ...base, tag: '착용 중', tf: C.btn, tc: '#FFFFFF' };
+        if (owned) return { ...base, tag: '보유', tf: C.soft, tc: C.primary };
+        if (it.reward) { const [tf, tc] = tagTone(it.tone); return { ...base, locked: true, tag: it.reward, tf, tc }; }
+        return { ...base, price: it.price, afford: st.pearls >= it.price };
       });
     }
     const grid = al(b, 'V', { gap: 10, fillW: true });
@@ -443,14 +487,15 @@
         const card = al(rw, 'V', { gap: 6, pad: [12, 6], fill: C.card, radius: 16, align: 'CENTER', grow: true, stroke: it.sel ? C.btn : null, sw: 2 });
         art(card, it.svg, 46, { opacity: it.locked ? 0.35 : null });
         txt(card, it.name, 'CM', it.locked ? C.mute : C.ink);
-        pill(card, it.tag, it.tf, it.tc);
+        if (it.price != null) pearlTag(card, it.price, { fill: it.afford ? C.soft : '#F3F6F9', color: it.afford ? C.primary : C.mute });
+        else pill(card, it.tag, it.tf, it.tc);
         tap(card, it.fn, it.name);
       }
     }
     const bn = al(b, 'H', { name: 'collab-banner', gap: 12, pad: [14, 16], fill: G.banner, radius: 18, align: 'CENTER', fillW: true });
-    const bt = al(bn, 'V', { gap: 2, grow: true }); txt(bt, '브랜드 콜라보 수영복 도착', 'BM', C.ink); txt(bt, '획득하면 실물 수영복 20% 할인 쿠폰', 'CR', C.sub);
+    const bt = al(bn, 'V', { gap: 2, grow: true }); txt(bt, '진주로 못 사는 아이템도 있어요', 'BM', C.ink); txt(bt, '섬 도착 · 수영장 대결 · 강습반 목표 보상', 'CR', C.sub);
     art(bn, P.icon.chev(C.coral), 24);
-    tap(bn, () => ctx.act('toast', '콜라보 수영복은 11월 수영장 대결 보상이에요'), '브랜드 콜라보 수영복');
+    tap(bn, () => ctx.go('pool'), '우리 수영장 보상 보기');
     tabBar(s, '꾸미기');
     return s;
   };
@@ -467,21 +512,27 @@
     const nm = al(hl, 'H', { gap: 6, align: 'CENTER' }); txt(nm, POOLS[st.pool][0], 'T', C.ink);
     if (ctx.live && st.verified[st.pool]) pill(nm, '인증', C.soft, C.primary, 'L', [2, 6]);
     pill(h, `멤버 ${POOLS[st.pool][2]}명`, C.soft, C.primary, 'CM', [6, 10]);
-    const rc = al(b, 'V', { name: 'shared-reef', gap: 10, pad: [18, 18], fill: '#DDF5F2', radius: 24, fillW: true });
+    const r = route(st.pool, ctx.live && st.synced ? TODAY.m / 1000 : 0);
+    const rc = al(b, 'V', { name: 'sea-route', gap: 10, pad: [18, 18], fill: '#DDF5F2', radius: 24, fillW: true });
     const rh = al(rc, 'H', { justify: 'SPACE_BETWEEN', align: 'MAX', fillW: true });
-    const rl = al(rh, 'V', { gap: 2 }); txt(rl, '이번 달 공동 리프', 'H', C.ink);
-    const nums = al(rl, 'H', { gap: 4, align: 'MAX' }); txt(nums, '312', 'D', '#0E8F86'); txt(nums, '/ 500km', 'BM', C.sub);
-    txt(rh, '62%', 'H', '#0E8F86');
-    progress(rc, 62, '#1BB5AA', '#FFFFFF');
+    const rl = al(rh, 'V', { gap: 2 }); txt(rl, '우리 수영장 바닷길', 'H', C.ink);
+    const nums = al(rl, 'H', { gap: 4, align: 'MAX' }); txt(nums, Math.floor(r.km).toLocaleString(), 'D', '#0E8F86'); txt(nums, 'km 함께 헤엄쳤어요', 'BM', C.sub);
+    const nx = al(rh, 'V', { gap: 0, align: 'MAX' }); txt(nx, `${r.nextName}까지`, 'CR', C.sub); txt(nx, `${Math.ceil(r.left)}km`, 'H', '#0E8F86');
+    art(rc, routeSvg(r.at), 318);
+    txt(rc, `멤버 ${POOLS[st.pool][2]}명 · 섬 간격 ${r.gap}km (멤버 1명당 ${KM_PER_MEMBER}km)`, 'CR', C.sub);
+    const rw0 = al(rc, 'H', { gap: 8, pad: [10, 12], fill: '#FFFFFF', radius: 12, align: 'CENTER', fillW: true });
+    art(rw0, P.icon.pearl, 22); txt(rw0, `${r.nextName}에 닿으면 이번 달 인증하고 수영한 멤버 모두 진주 30개 + 새 바다 친구`, 'CR', C.ink, { fillW: true });
+    // 공동 리프: 지나온 섬의 기념품이 쌓이는 곳 (세로 1.5배 · 물 배경 · 왕복하는 내 캐릭터)
+    const rf = al(b, 'V', { name: 'shared-reef', gap: 8, pad: [16, 16], fill: C.card, radius: 20, fillW: true });
+    const rfh = al(rf, 'H', { justify: 'SPACE_BETWEEN', align: 'CENTER', fillW: true }); txt(rfh, '공동 리프', 'H', C.ink); pill(rfh, `기념품 ${Math.floor(r.at)}개`, C.soft, C.primary, 'L', [3, 8]);
     if (ctx.live) {
-      // 세로 1.5배 · 물 배경 · 산호 사이를 왕복하는 내 캐릭터
-      const tank = al(rc, 'V', { name: 'reef-tank', w: 318, h: 129, radius: 16, clip: true, cls: 'reef-tank' });
+      const tank = al(rf, 'V', { name: 'reef-tank', w: 318, h: 129, radius: 16, clip: true, cls: 'reef-tank' });
       abs(tank, art(null, P.scene.reefWater, 318), 0, 0);
       abs(tank, art(null, P.scene.reef, 318), 0, 43);
       const sw = al(null, 'V', { w: 70, cls: 'reef-swimmer' }); art(sw, swim(ctx), 70);
       abs(tank, sw, 124, 40);
-    } else art(rc, P.scene.reef, 318);
-    txt(rc, '100km마다 산호가 하나씩 자라요 · 다음 산호까지 88km', 'CR', C.sub);
+    } else art(rf, P.scene.reef, 318);
+    txt(rf, '섬을 지날 때마다 그 섬의 산호가 리프에 자라요', 'CR', C.sub);
     const bc = al(b, 'V', { name: 'pool-battle', gap: 12, pad: [18, 18], fill: C.card, radius: 20, fillW: true });
     const bh = al(bc, 'H', { justify: 'SPACE_BETWEEN', align: 'CENTER', fillW: true }); txt(bh, '10월 수영장 대결', 'H', C.ink); pill(bh, 'D-9', C.pinkL, C.coral, 'L', [4, 8]);
     [[`${POOLS[st.pool][0]} (우리)`, '312km', 100, C.btn, C.soft, C.primary], ['바람결 수영장', '287km', 92, C.pink, C.pinkL, C.coral]].forEach(([n, km, pct, col, trk, tc]) => {
@@ -524,7 +575,7 @@
     const fr = st.follow.length ? st.follow : [];
     [[70, 206, 46], [262, 268, 42], [160, 318, 56]].forEach(([x, y, w], i) => { if (fr[i]) abs(scene, art(null, A.sea(fr[i]), w), x, y).classList.add('drift', 'd' + (i + 1)); });
     abs(scene, art(null, P.scene.sideSurface, 390), 0, 104);
-    const play = al(null, 'H', { gap: 6, pad: [6, 12], fill: C.card, op: 0.92, radius: 999, align: 'CENTER' }); art(play, P.icon.play, 10); txt(play, '자유형 왕복 중 · 실시간', 'L', C.ink, { size: 12 });
+    const play = al(null, 'H', { gap: 6, pad: [6, 12], fill: C.card, op: 0.92, radius: 999, align: 'CENTER' }); art(play, P.icon.play, 10); txt(play, '왕복 중 · 실시간', 'L', C.ink, { size: 12 });
     abs(scene, play, 16, 122);
     const dz = al(null, 'H', { gap: 4, pad: [7, 12], fill: deco ? C.navy : C.card, op: deco ? null : 0.92, radius: 999, align: 'CENTER' });
     txt(dz, deco ? '꾸미는 중' : '바닥 꾸미기', 'L', deco ? '#FFFFFF' : C.ink, { size: 12 });
@@ -562,7 +613,7 @@
     const gl = al(tr, 'H', { fill: '#FFF0FA', radius: 14, w: 28, h: 28, align: 'CENTER', justify: 'CENTER' }); art(gl, P.icon.goal, 14);
     const cap = al(stc, 'H', { justify: 'SPACE_BETWEEN', fillW: true }); txt(cap, '오늘 12 / 20 왕복 · 600m', 'CM', C.sub); txt(cap, '다음 턴까지 0:18', 'CM', C.primary, { weight: 700 });
     txt(b, '오늘 풀에 생긴 일', 'CM', C.sub);
-    [['clownfish', '흰동가리가 레인을 따라왔어요', '자유형 800m 달성', true], ['turtle', '바다거북이 놀러 왔어요', '평영 200m 달성', true], ['mackerel', '고등어 떼까지 2왕복', '오래 꾸준히 수영하면 만나요', false]].forEach(([k, t, sub, done]) => {
+    [['clownfish', '흰동가리가 레인을 따라와요', '따라오는 바다 친구', true], ['turtle', '바다거북이 놀러 왔어요', '우리 수영장이 산호섬에 닿았어요', true], ['mackerel', '고등어 떼가 기다려요', '우리 수영장이 등대섬에 닿으면 만나요', false]].forEach(([k, t, sub, done]) => {
       const row = al(b, 'H', { gap: 12, pad: [12, 14], fill: C.card, radius: 20, align: 'CENTER', fillW: true });
       const ic = al(row, 'H', { fill: C.soft, radius: 16, w: 48, h: 48, align: 'CENTER', justify: 'CENTER' }); art(ic, A.sea(k), 40);
       const col = al(row, 'V', { gap: 2, grow: true }); txt(col, t, 'H', C.ink, { size: 15 }); txt(col, sub, 'CR', C.sub, { size: 13 });
@@ -586,8 +637,10 @@
     const hl = al(h, 'V', { gap: 2 }); txt(hl, '만난 바다 친구', 'CR', C.sub); txt(hl, '바다 도감', 'T', C.ink);
     pill(h, `${ctx.live ? st.friends.length : 12} / 120종`, C.soft, C.primary, 'CM', [6, 10]);
     const pc = al(b, 'V', { gap: 8, pad: [14, 16], fill: G.dex, radius: 18, fillW: true });
-    const pr = al(pc, 'H', { justify: 'SPACE_BETWEEN', fillW: true }); txt(pr, '다음 친구까지', 'CM', C.ink); txt(pr, '접영 120m 남음', 'CM', C.primary);
-    progress(pc, 76, C.btn, '#FFFFFF');
+    const rr = route(st.pool, ctx.live && st.synced ? TODAY.m / 1000 : 0);
+    const pr = al(pc, 'H', { justify: 'SPACE_BETWEEN', fillW: true }); txt(pr, `다음 친구는 ${rr.nextName}에서`, 'CM', C.ink); txt(pr, `우리 수영장 ${Math.ceil(rr.left)}km 남음`, 'CM', C.primary);
+    progress(pc, Math.round((rr.at % 1) * 100), C.btn, '#FFFFFF');
+    txt(pc, '우리 수영장이 섬에 닿으면 멤버 모두 그 섬의 친구를 만나요', 'CR', C.sub);
     const filter = ctx.live ? st.dexFilter : '전체';
     const chips = al(b, 'H', { gap: 8, fillW: true });
     ['전체', '물고기', '고래', '거북·해달', '기타'].forEach((c) => { const on = c === filter; const ch = al(chips, 'H', { pad: [7, 12], radius: 999, fill: on ? C.ink : C.card, stroke: on ? null : C.line }); txt(ch, c, 'CM', on ? '#FFFFFF' : C.sub); tap(ch, () => ctx.act('dexFilter', c), c); });
@@ -599,8 +652,8 @@
         const k = keys[r * 3 + c];
         if (!k) { al(row, 'V', { grow: true }); continue; }
         const found = st.friends.includes(k);
-        const isNew = k === 'dolphin';
-        const tagText = { clownfish: '자유형 · 짧게', mackerel: '자유형 · 오래', tuna: '자유형 빠르게', turtle: '평영', otter: '배영', dolphin: '혼영 · NEW', humpback: '접영 500m', octopus: '이벤트', bluewhale: '접영 마스터' }[k];
+        const isNew = k === 'otter';
+        const tagText = SEA[k][2] + (isNew ? ' · NEW' : '');
         const card = al(row, 'V', { gap: 6, pad: [12, 6], fill: found ? C.card : '#EEF3F8', radius: 18, align: 'CENTER', grow: true });
         const ho = al(card, 'H', { fill: found ? '#E8F4FF' : '#E2EAF2', radius: 30, w: 60, h: 60, align: 'CENTER', justify: 'CENTER' });
         art(ho, found ? A.sea(k) : A.seaSilhouette(k), 54);
@@ -628,14 +681,14 @@
     const pi = al(pf, 'V', { gap: 3, grow: true }); txt(pi, st.name, 'H', C.ink); txt(pi, `${POOLS[st.pool][0]} · 새벽 6시 중급반`, 'CR', C.sub); pill(pi, '킥판 졸업반', C.pinkL, '#D94FAE');
     const ed = al(pf, 'H', { pad: [6, 10], radius: 999, stroke: C.line }); txt(ed, '편집', 'CM', C.sub); tap(ed, () => ctx.go('pick'), '캐릭터 편집');
     const stats = al(b, 'H', { pad: [14, 8], fill: C.card, radius: 20, fillW: true });
-    [['총 거리', '48.2km'], ['수영한 날', '36일'], ['최장 연속', '4주']].forEach(([k, v]) => { const c = al(stats, 'V', { gap: 2, align: 'CENTER', grow: true }); txt(c, v, 'H', C.ink); txt(c, k, 'CR', C.sub); });
+    [['총 거리', '48.2km'], ['수영한 날', '36일'], ['내 진주', st.pearls.toLocaleString()]].forEach(([k, v]) => { const c = al(stats, 'V', { gap: 2, align: 'CENTER', grow: true }); txt(c, v, 'H', C.ink); txt(c, k, 'CR', C.sub); });
     const gr = al(b, 'V', { name: 'graduation', gap: 8, pad: [14, 16], fill: G.soft3, radius: 20, fillW: true });
     const gt = al(gr, 'H', { justify: 'SPACE_BETWEEN', fillW: true }); txt(gt, '킥판 졸업까지', 'BM', C.ink); txt(gt, '12km 남음', 'CM', C.primary);
     progress(gr, 80, C.btn, '#FFFFFF');
     txt(gr, `졸업하면 ${st.name.replace('새벽반 ', '')}가 킥판 없이 헤엄쳐요`, 'CR', C.sub);
     const unread = NOTICES.length - st.read.length;
     const list = al(b, 'V', { fill: C.card, radius: 20, fillW: true, pad: [4, 0] });
-    [['워치 연동', 'Apple Watch 연결됨', () => ctx.act('toast', 'Apple Watch에서 오늘 기록을 받아왔어요')], ['내 수영장', POOLS[st.pool][0], () => ctx.go('pool-set')], ['우리 강습반', '새벽 6시 중급반', () => ctx.go('pool')], ['보관함', `아이템 ${st.owned.length}개`, () => ctx.go('dress')], ['알림 설정', '', () => ctx.act('toast', '알림 설정은 곧 열려요')], ['공지사항', unread > 0 ? `새 글 ${Math.min(2, unread)}` : '', () => ctx.go('notice')]].forEach(([t, v, fn], i) => {
+    [['워치 연동', 'Apple Watch 연결됨', () => ctx.act('toast', 'Apple Watch에서 오늘 기록을 받아왔어요')], ['내 수영장', POOLS[st.pool][0], () => ctx.go('pool-set')], ['우리 강습반', '새벽 6시 중급반', () => ctx.go('pool')], ['보관함', `아이템 ${st.owned.length}개 · 진주 ${st.pearls}`, () => ctx.go('dress')], ['알림 설정', '', () => ctx.act('toast', '알림 설정은 곧 열려요')], ['공지사항', unread > 0 ? `새 글 ${Math.min(2, unread)}` : '', () => ctx.go('notice')]].forEach(([t, v, fn], i) => {
       const r = al(list, 'H', { gap: 8, pad: [14, 16], align: 'CENTER', fillW: true }); divider(r, i);
       txt(r, t, 'BM', C.ink, { grow: true });
       if (v) { if (t === '공지사항') pill(r, v, C.pink, C.ink, 'L', [2, 7]); else txt(r, v, 'CM', t === '워치 연동' ? C.primary : C.sub); }
@@ -658,7 +711,7 @@
     art(meRow, P.icon.chev(), 18);
     tap(meRow, () => ctx.go('my'), '마이페이지');
     const M = P.menu;
-    const tiles = [[M.box, '오늘의 상자', 'home'], [M.shirt, '꾸미기', 'dress'], [M.pool, 'MY POOL', 'mypool'], [M.group, '우리 수영장', 'pool'], [M.book, '바다 도감', 'dex'], [M.chart, '수영 기록', null]];
+    const tiles = [[M.box, '오늘의 진주', 'home'], [M.shirt, '꾸미기', 'dress'], [M.pool, 'MY POOL', 'mypool'], [M.group, '우리 수영장', 'pool'], [M.book, '바다 도감', 'dex'], [M.chart, '수영 기록', null]];
     const grid = al(b, 'V', { gap: 10, fillW: true });
     for (let r = 0; r < 2; r++) {
       const row = al(grid, 'H', { gap: 10, fillW: true });
@@ -719,33 +772,32 @@
     return s;
   };
 
-  // ---------- 09 내 수영장 설정 (이사 · 수영장 변경) ----------
+  // ---------- 09 내 수영장 설정 (이사 · 한 달에 한 번 변경) ----------
   S['09'] = (ctx) => {
     const st = ctx.st;
-    const slots = st.slots || [st.pool, null];
-    const slot = ctx.live ? (st.slot || 0) : 0;
+    const cur = st.pool;
+    const locked = ctx.live && st.poolChanged === monthKey();
     const s = screen('09');
     const b = content(s, [6, 20, 34, 20], 14);
     const h = al(b, 'H', { gap: 8, align: 'CENTER', fillW: true }); iconBtn(h, P.icon.back, 24, () => ctx.back(), '뒤로'); txt(h, '내 수영장 설정', 'T', C.ink);
-    txt(b, '이사했거나 다니는 수영장이 바뀌었다면 여기서 바꿔요.\n수영장은 최대 2곳까지 등록할 수 있어요.', 'CR', C.sub, { fillW: true });
-    // 등록 슬롯 2개
-    const sl = al(b, 'H', { gap: 8, fillW: true });
-    slots.forEach((pi, i) => {
-      const on = i === slot;
-      const c = al(sl, 'H', { gap: 6, pad: [0, 14], radius: 14, align: 'CENTER', justify: pi == null ? 'CENTER' : 'SPACE_BETWEEN', grow: true, h: 48, fill: on ? C.navy : C.card, stroke: on ? null : C.line });
-      if (pi == null) { txt(c, '+ 수영장 추가', 'BM', on ? '#FFFFFF' : C.sub); tap(c, () => ctx.act('poolSlot', i), '수영장 추가'); return; }
-      const nm = POOLS[pi][3];
-      const l = al(c, 'H', { gap: 6, align: 'CENTER' }); txt(l, nm, 'BM', on ? '#FFFFFF' : C.ink);
-      if (st.verified && st.verified[pi]) pill(l, '인증', on ? '#FFFFFF' : C.soft, C.primary, 'L', [2, 6]);
-      if (i === 1 && ctx.live) { const x = art(c, P.icon.close, 16); tap(x, () => ctx.act('removeSlot'), '이 수영장 삭제'); }
-      else if (i === 0) txt(c, '대표', 'L', on ? '#BFD4FF' : C.mute);
-      tap(c, () => ctx.act('poolSlot', i), nm);
-    });
+    txt(b, '이사했거나 다니는 수영장이 바뀌었다면 여기서 바꿔요.\n내 수영장은 한 곳이고, 한 번 바꾸면 그달에는 다시 못 바꿔요.', 'CR', C.sub, { fillW: true });
+    // 지금 내 수영장
+    const ok = st.verified && st.verified[cur];
+    const now = al(b, 'H', { gap: 12, pad: [14, 16], fill: C.navy, radius: 18, align: 'CENTER', fillW: true });
+    const ic = al(now, 'H', { fill: '#2E37B8', radius: 12, w: 40, h: 40, align: 'CENTER', justify: 'CENTER' }); art(ic, P.icon.wave('#FFFFFF'), 20);
+    const nc = al(now, 'V', { gap: 2, grow: true });
+    txt(nc, '지금 내 수영장', 'L', '#BFD4FF');
+    const nt = al(nc, 'H', { gap: 6, align: 'CENTER' }); txt(nt, POOLS[cur][0], 'BM', '#FFFFFF'); if (ok) pill(nt, '인증', '#FFFFFF', C.primary, 'L', [2, 6]);
+    txt(nc, `${POOLS[cur][3]} · 멤버 ${POOLS[cur][2]}명`, 'CR', '#BFD4FF', { size: 12 });
+    if (locked) {
+      const lk = al(b, 'H', { gap: 10, pad: [12, 14], fill: C.pinkL, radius: 14, align: 'CENTER', fillW: true });
+      txt(lk, '이번 달에 이미 바꿨어요', 'CM', C.coral, { weight: 700 });
+      txt(lk, `${nextMonthLabel()}부터 다시 바꿀 수 있어요`, 'CR', C.ink, { grow: true });
+    }
     // 지도 + 내 위치
-    const cur = slots[slot];
     const map = al(b, 'V', { name: 'map', radius: 20, fillW: true, h: 170, clip: true });
     abs(map, art(null, P.scene.map, 350), 0, 0);
-    if (cur != null) abs(map, (() => { const c = al(null, 'H', { gap: 4, pad: [5, 10], fill: C.navy, radius: 999, align: 'CENTER' }); txt(c, POOLS[cur][0], 'L', '#FFFFFF'); return c; })(), 210, 30);
+    abs(map, (() => { const c = al(null, 'H', { gap: 4, pad: [5, 10], fill: C.navy, radius: 999, align: 'CENTER' }); txt(c, POOLS[cur][0], 'L', '#FFFFFF'); return c; })(), 210, 30);
     const loc = al(null, 'H', { gap: 6, pad: [8, 12], fill: C.card, radius: 999, align: 'CENTER' }); art(loc, P.icon.locate, 16);
     txt(loc, ctx.live && st.located ? '현재 위치 · 성내동 근처' : '현재 위치로 찾기', 'CM', C.primary, { weight: 700 });
     tap(loc, () => ctx.act('locate'), '현재 위치로 찾기');
@@ -754,31 +806,26 @@
     const list = al(b, 'V', { fill: C.card, radius: 20, fillW: true, pad: [4, 0] });
     POOLS.forEach(([n, meta, mem, dong], i) => {
       const sel = i === cur;
-      const other = slots.includes(i) && !sel;
       const r = al(list, 'H', { gap: 12, pad: [12, 16], align: 'CENTER', fillW: true }); divider(r, i);
       const col = al(r, 'V', { gap: 2, grow: true });
-      const t = al(col, 'H', { gap: 6, align: 'CENTER' }); txt(t, n, 'BM', other ? C.mute : C.ink); pill(t, dong, sel ? C.soft : C.paleBlue, sel ? C.primary : C.sub, 'L', [2, 6]);
+      const t = al(col, 'H', { gap: 6, align: 'CENTER' }); txt(t, n, 'BM', locked && !sel ? C.mute : C.ink); pill(t, dong, sel ? C.soft : C.paleBlue, sel ? C.primary : C.sub, 'L', [2, 6]);
       txt(col, `${meta} · 멤버 ${mem}명`, 'CR', C.sub, { size: 12 });
-      if (other) txt(r, '등록됨', 'L', C.mute);
-      else { const rd = al(r, 'H', { fill: sel ? C.btn : C.card, stroke: sel ? null : C.mute, sw: 1.5, radius: 11, w: 22, h: 22, align: 'CENTER', justify: 'CENTER' }); if (sel) dot(rd, 8, '#FFFFFF'); }
+      const rd = al(r, 'H', { fill: sel ? C.btn : C.card, stroke: sel ? null : C.mute, sw: 1.5, radius: 11, w: 22, h: 22, align: 'CENTER', justify: 'CENTER' }); if (sel) dot(rd, 8, '#FFFFFF');
       tap(r, () => ctx.act('choosePool', i), n);
     });
     // 인증
-    if (cur != null) {
-      const ok = st.verified && st.verified[cur];
-      const v = al(b, 'H', { gap: 12, pad: [14, 16], fill: ok ? '#E6F7EC' : G.soft3, radius: 20, align: 'CENTER', fillW: true });
-      art(v, A.seal, 46);
-      const vc = al(v, 'V', { gap: 2, grow: true });
-      txt(vc, ok ? `${POOLS[cur][0]} 인증 완료` : '수영장에서 인증해 주세요', 'BM', C.ink);
-      txt(vc, ok ? '공동 리프 · 수영장 대결에 참여할 수 있어요' : '수영장 근처에서 위치를 확인하면 공동 리프에 참여해요', 'CR', C.sub, { fillW: true, size: 12 });
-      if (!ok) { const vb = al(v, 'H', { pad: [8, 12], fill: C.btn, radius: 12, cls: 'btn' }); txt(vb, '인증하기', 'CM', '#FFFFFF', { weight: 700 }); tap(vb, () => ctx.act('verify'), '수영장 인증하기'); }
-    }
+    const v = al(b, 'H', { gap: 12, pad: [14, 16], fill: ok ? '#E6F7EC' : G.soft3, radius: 20, align: 'CENTER', fillW: true });
+    art(v, A.seal, 46);
+    const vc = al(v, 'V', { gap: 2, grow: true });
+    txt(vc, ok ? `${POOLS[cur][0]} 인증 완료` : '수영장에서 인증해 주세요', 'BM', C.ink);
+    txt(vc, ok ? '내 거리가 우리 수영장 바닷길과 대결에 들어가요' : '수영장 근처에서 위치를 확인하면 바닷길에 함께해요', 'CR', C.sub, { fillW: true, size: 12 });
+    if (!ok) { const vb = al(v, 'H', { pad: [8, 12], fill: C.btn, radius: 12, cls: 'btn' }); txt(vb, '인증하기', 'CM', '#FFFFFF', { weight: 700 }); tap(vb, () => ctx.act('verify'), '수영장 인증하기'); }
     const note = al(b, 'V', { gap: 4, pad: [12, 14], fill: '#EEF3F9', radius: 14, fillW: true });
-    ['수영장을 바꾸면 우리 수영장 · 강습반 · 공동 리프가 새 수영장으로 바뀌어요.', '모은 친구와 아이템, MY POOL 꾸미기는 그대로 남아요.', '수영장 변경은 30일에 2번까지 할 수 있어요.'].forEach((l) => txt(note, '· ' + l, 'CR', C.sub, { fillW: true, size: 12 }));
+    ['수영장은 한 달에 한 번 바꿀 수 있어요. 처음 고른 건 횟수에 넣지 않아요.', '이미 헤엄친 거리는 이전 수영장 바닷길에 그대로 남아요.', '모은 진주와 아이템, MY POOL 꾸미기는 그대로예요.', '다른 수영장에서 헤엄친 날도 진주는 받아요.'].forEach((l) => txt(note, '· ' + l, 'CR', C.sub, { fillW: true, size: 12 }));
     return s;
   };
 
   const DEFAULT_CTX = () => ({ st: JSON.parse(JSON.stringify(DEFAULT_STATE)), go() {}, act() {}, back() {}, live: false });
   function render(id, ctx) { CTX = ctx || DEFAULT_CTX(); const s = S[id](CTX); applyOverlaps(s); return s; }
-  window.USUKKU = { render, ids: Object.keys(S), C, G, DEFAULT_STATE, ANIMALS, FURS, POOLS, ITEMS, SEA, NOTICES, furName, animalName, me: (ctx, e) => me(ctx, e) };
+  window.USUKKU = { render, ids: Object.keys(S), C, G, DEFAULT_STATE, ANIMALS, FURS, POOLS, ITEMS, SEA, NOTICES, ISLANDS, TODAY, todayPearls, seaHow, route, monthKey, nextMonthLabel, furName, animalName, me: (ctx, e) => me(ctx, e) };
 })();

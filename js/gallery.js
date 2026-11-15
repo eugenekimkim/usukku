@@ -76,10 +76,10 @@
   quirks.forEach(([k, who, say]) => { const c = document.createElement('div'); c.className = 'card quirk'; c.innerHTML = `<div class="art">${A.animal(k)}</div><div><div class="who"></div><div class="say"></div></div>`; c.querySelector('.who').textContent = who; c.querySelector('.say').textContent = say; qHost.appendChild(c); });
 
   const seaSheet = document.getElementById('seaSheet'); seaSheet.classList.add('sea');
-  sheetRow(seaSheet, '자유형 → 물고기 (짧게 · 오래 · 빠르게)', [['clownfish', '흰동가리'], ['mackerel', '고등어'], ['tuna', '참치']].map(([k, l]) => cell(A.sea(k), l)));
-  sheetRow(seaSheet, '접영 → 고래 (단계별)', [['humpback', '혹등고래'], ['orca', '범고래'], ['bluewhale', '대왕고래']].map(([k, l]) => cell(A.sea(k), l)));
-  sheetRow(seaSheet, '평영 · 배영 · 혼영', [['turtle', '바다거북'], ['otter', '해달'], ['dolphin', '돌고래']].map(([k, l]) => cell(A.sea(k), l)));
-  sheetRow(seaSheet, '그 외 바다 친구 · 물개 코치', [...[['jellyfish', '해파리'], ['octopus', '문어'], ['puffer', '복어'], ['starfish', '불가사리']].map(([k, l]) => cell(A.sea(k), l)), cell(A.seal, '물개 코치')]);
+  sheetRow(seaSheet, '모래섬 · 산호섬 · 해초섬', [['clownfish', '흰동가리'], ['turtle', '바다거북'], ['octopus', '문어'], ['otter', '해달']].map(([k, l]) => cell(A.sea(k), l)));
+  sheetRow(seaSheet, '등대섬', [['mackerel', '고등어'], ['dolphin', '돌고래']].map(([k, l]) => cell(A.sea(k), l)));
+  sheetRow(seaSheet, '고래섬', [['tuna', '참치'], ['humpback', '혹등고래'], ['orca', '범고래'], ['bluewhale', '대왕고래']].map(([k, l]) => cell(A.sea(k), l)));
+  sheetRow(seaSheet, '그 외 바다 친구 · 물개 코치', [...[['jellyfish', '해파리'], ['puffer', '복어'], ['starfish', '불가사리']].map(([k, l]) => cell(A.sea(k), l)), cell(A.seal, '물개 코치')]);
 
   // ---------- 컬러 · 텍스트 스타일 ----------
   const pal = [['배경', '#F3F9FF', 'var(--ink)', 1], ['수영장 · 무대', '#CDEBFF', 'var(--ink)'], ['버튼 · 진행', '#456AFF', '#fff'], ['강조 텍스트 · 아이콘', '#1F8BFF', '#fff'], ['본문 텍스트', '#0F2A43', '#fff'], ['보조 텍스트', '#5B7590', '#fff'], ['선택 칩', '#1B22A6', '#fff'], ['연한 칩', '#DEEDFF', 'var(--ink)'], ['포인트 · 한정', '#FFBFEC', 'var(--ink)'], ['한정 태그 바탕', '#FFE3F6', 'var(--ink)']];
@@ -87,7 +87,7 @@
   pal.forEach(([n, hex, fg, border]) => { const d = document.createElement('div'); d.className = 'sw'; d.style.background = hex; d.style.color = fg; if (border) d.style.boxShadow = 'inset 0 0 0 1px var(--line)'; d.innerHTML = `${n}<span>${hex}</span>`; pHost.appendChild(d); });
   const g = document.createElement('div'); g.className = 'sw wide'; g.style.background = 'var(--g-special)'; g.innerHTML = '스페셜 그라디언트<span>#FFD6F2 → #DDF8FF → #C9D4FF → #FFFCDE</span>'; pHost.appendChild(g);
 
-  const ts = [['D', 'Display / 28 Bold', '우수꾸 312km'], ['T', 'Title / 22 Bold', '오늘의 수영 완료!'], ['H', 'Heading / 17 Bold', '오늘의 상자가 도착했어요'], ['BM', 'Body / 15 Medium', '브랜드 콜라보 수영복 도착'], ['BR', 'Body / 15 Regular', '내 수영 기록만큼 친구들도 물과 친해져요'], ['CM', 'Caption / 13 Medium', '다음 친구까지 접영 120m'], ['CR', 'Caption / 12 Regular', '10월 22일 목요일 · 새벽 6:40'], ['L', 'Label / 11 Bold', '새벽 수영 한정']];
+  const ts = [['D', 'Display / 28 Bold', '우수꾸 312km'], ['T', 'Title / 22 Bold', '오늘의 수영 완료!'], ['H', 'Heading / 17 Bold', '오늘 기록이 도착했어요'], ['BM', 'Body / 15 Medium', '브랜드 콜라보 수영복 도착'], ['BR', 'Body / 15 Regular', '내 수영 기록만큼 친구들도 물과 친해져요'], ['CM', 'Caption / 13 Medium', '등대섬까지 102km'], ['CR', 'Caption / 12 Regular', '10월 22일 목요일 · 새벽 6:40'], ['L', 'Label / 11 Bold', '새벽 수영 한정']];
   const tHost = document.getElementById('typeScale');
   ts.forEach(([k, n, s]) => { const r = document.createElement('div'); r.className = 't-row'; r.innerHTML = `<div class="t-name"></div><div class="tx ts-${k}"></div>`; r.querySelector('.t-name').textContent = n; r.querySelector(`.ts-${k}`).textContent = s; tHost.appendChild(r); });
 })();

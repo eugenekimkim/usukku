@@ -182,7 +182,7 @@
   // ---------- 물개 코치 ----------
   const seal = `<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><g fill="${INK}" stroke="${INK}" stroke-width="3" stroke-linejoin="round"><path d="M14 52C10 40 14 22 30 16C42 12 52 20 52 32C52 44 44 54 32 56C24 57 18 56 14 52Z"/><ellipse cx="14" cy="50" rx="8" ry="4" transform="rotate(-25 14 50)"/><ellipse cx="50" cy="50" rx="8" ry="4" transform="rotate(25 50 50)"/></g><path d="M14 52C10 40 14 22 30 16C42 12 52 20 52 32C52 44 44 54 32 56C24 57 18 56 14 52Z" fill="#B7C3CF"/><ellipse cx="14" cy="50" rx="8" ry="4" fill="#B7C3CF" transform="rotate(-25 14 50)"/><ellipse cx="50" cy="50" rx="8" ry="4" fill="#B7C3CF" transform="rotate(25 50 50)"/><path d="M24 18c4-6 14-7 20-2l-2 4c-5-3-11-3-16 1z" fill="#FF7A6B" stroke="${INK}" stroke-width="2" stroke-linejoin="round"/><ellipse cx="37" cy="33" rx="7" ry="5" fill="#E7EDF3"/><circle cx="29" cy="28" r="1.8" fill="${INK}"/><circle cx="43" cy="28" r="1.8" fill="${INK}"/><ellipse cx="37" cy="31" rx="2.2" ry="1.6" fill="${INK}"/><path d="M33 34l-6 1M33 36l-6 2M41 34l6 1M41 36l6 2" stroke="${INK}" stroke-width="1.1" stroke-linecap="round"/><path d="M36 38v8" stroke="#1F8BFF" stroke-width="1.6"/><rect x="33.5" y="45" width="5" height="4" rx="1.5" fill="#FFC94A" stroke="${INK}" stroke-width="1.4"/><ellipse cx="24" cy="34" rx="3.5" ry="2.2" fill="#FF9E9E" fill-opacity=".7"/></svg>`;
 
-  // ---------- 옆에서 본 수영하는 친구 (자유형, 오른쪽을 보고 헤엄) ----------
+  // ---------- 옆에서 본 수영하는 친구 (오른쪽을 보고 헤엄) ----------
   const SW_GOG = { rabbit: '#FF7A6B', hamster: '#1F8BFF', bear: '#1F8BFF', cat: '#FF7A6B', sheep: '#FFB547' };
   const SW_SUIT = { rabbit: { color: '#3ED3C9' }, bear: { color: '#1E3A8A' } };
   // opts: { cap: {color}, goggle, suit: {color, stripe} | null(=처음 옷), fin }
