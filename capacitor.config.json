@@ -1,0 +1,27 @@
+{
+  "appId": "kr.co.itso.usukku",
+  "appName": "우수꾸",
+  "webDir": "www",
+  "backgroundColor": "#F3F9FF",
+  "ios": {
+    "contentInset": "never",
+    "backgroundColor": "#F3F9FF"
+  },
+  "android": {
+    "backgroundColor": "#F3F9FF"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 600,
+      "launchAutoHide": true,
+      "backgroundColor": "#F3F9FF",
+      "showSpinner": false,
+      "androidScaleType": "CENTER_INSIDE"
+    },
+    "SystemBars": {
+      "insetsHandling": "css",
+      "initialViewportFitValueHint": "cover",
+      "style": "LIGHT"
+    }
+  }
+}

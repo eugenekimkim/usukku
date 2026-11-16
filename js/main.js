@@ -1,12 +1,29 @@
 // 우수꾸 앱: 라우팅 · 상태 저장 · 진주 받기 · 상점 · 시트 · 토스트
 (function () {
-  const U = window.USUKKU, A = window.ART;
-  const KEY = 'usukku:v3';
+  const U = window.USUKKU, A = window.ART, H = window.Health, PEARLS = window.PEARLS;
+  const KEY = 'usukku:v4', OLD_KEY = 'usukku:v3';
+  const NATIVE = H.isNative(), PLATFORM = H.platform();
   const ROUTES = { splash: '00-0', intro: '00-0b', pick: '00', 'pool-pick': '00-2', home: '01', dress: '02', pool: '03', mypool: '04-2', 'mypool-side': '04-2', 'pool-set': '09', dex: '05', my: '06', menu: '07', notice: '08' };
   const MAIN = ['home', 'dress', 'pool', 'dex'];
 
   const clone = (o) => JSON.parse(JSON.stringify(o));
-  function load() { try { const raw = localStorage.getItem(KEY); if (raw) return Object.assign(clone(U.DEFAULT_STATE), JSON.parse(raw)); } catch (e) { /* 저장소를 못 쓰면 기본값 */ } return clone(U.DEFAULT_STATE); }
+  // v3 → v4: 값은 그대로 옮기고, 날짜 없던 '받음' 표시(synced)만 오늘 원장으로 바꿔요
+  function migrate(o) {
+    const { synced, ...rest } = o;
+    if (synced && !NATIVE) { const l = PEARLS.ledgerFor(null); rest.pearlDay = PEARLS.apply(l, PEARLS.pending(H._.demoSwims(), l)); }
+    return rest;
+  }
+  function load() {
+    try {
+      let raw = localStorage.getItem(KEY);
+      if (!raw) {
+        const old = localStorage.getItem(OLD_KEY);
+        if (old) { raw = JSON.stringify(migrate(JSON.parse(old))); localStorage.setItem(KEY, raw); localStorage.removeItem(OLD_KEY); }
+      }
+      if (raw) { const o = JSON.parse(raw); return Object.assign(clone(U.DEFAULT_STATE), o, { health: Object.assign({ asked: false }, o.health) }); }
+    } catch (e) { /* 저장소를 못 쓰면 기본값 */ }
+    return clone(U.DEFAULT_STATE);
+  }
   function save() { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) { /* 무시 */ } }
   let st = load();
 
@@ -16,8 +33,15 @@
   let route = null;
   const stack = [];
 
+  const ledgerNow = () => PEARLS.ledgerFor(st.pearlDay);
+  // 오늘 수영 기록: { status, summary, pending } — 화면은 먼저 그리고, 값이 오면 다시 그려요
+  let today = { status: 'loading' };
+
   const ctx = {
     get st() { return st; },
+    get today() { return today; },
+    get ledger() { return ledgerNow(); },
+    platform: PLATFORM,
     live: true,
     go(r) { if (r === route) return; if (route && !MAIN.includes(r)) stack.push(route); if (MAIN.includes(r)) stack.length = 0; setHash(r); },
     back() { const r = stack.pop() || (st.onboarded ? 'home' : 'intro'); setHash(r); },
@@ -86,26 +110,49 @@
     setName(v) { st.name = v.trim() || defaultName(); st.nameEdited = !!v.trim(); save(); },
     setPool(i) { st.pool = i; refresh(); },
     finishOnboarding() { st.onboarded = true; save(); stack.length = 0; ctx.go('home'); toast(`${st.name}, 우수꾸에 온 걸 환영해요!`); },
+    // 워치 기록 받기 · 다시 확인하기: 읽는 동안은 지금의 받기 애니메이션(흔들리는 조개)
     sync() {
-      if (st.synced) { ctx.go('dress'); return; }
-      const n = U.todayPearls();
+      const T = today;
+      if (T.status === 'ok' && !(T.pending && T.pending.swims.length) && ledgerNow().swims.length) { ctx.go('dress'); return; }
+      if (syncing) return;
+      syncing = true;
       sheet((sh) => {
         sh.classList.add('box-open');
         const clam = el('div', 'art big-chest shake', window.PROPS.item.clam); sh.appendChild(clam);
         const title = text('div', 'sh-title', '워치에서 기록을 받는 중…'); sh.appendChild(title);
-        const sub = text('div', 'sh-sub', `오늘 ${U.TODAY.m.toLocaleString()}m · ${U.TODAY.min}분`); sh.appendChild(sub);
+        const sm = T.summary;
+        const sub = text('div', 'sh-sub', sm && sm.swims.length ? `오늘 ${sm.meters.toLocaleString()}m · ${sm.minutes}분` : '잠시만 기다려 주세요'); sh.appendChild(sub);
         const actions = el('div', 'sh-actions'); sh.appendChild(actions);
-        setTimeout(() => {
+        Promise.all([refreshToday(true), new Promise((r) => setTimeout(r, 1000))]).then(([R]) => {
+          syncing = false;
+          const p = R.pending;
+          if (R.status !== 'ok' || !p || !p.swims.length) {
+            // 받을 진주가 없으면 카드에서 상황을 안내해요
+            closeSheet(); render(route, true);
+            if (R.status === 'none') toast('오늘은 아직 수영 기록이 없어요');
+            return;
+          }
           clam.classList.remove('shake'); clam.classList.add('pop');
-          title.textContent = `진주 ${n}개를 받았어요!`;
-          sub.textContent = `${U.TODAY.m.toLocaleString()}m → 진주 ${n - 5}개 · 오늘 첫 수영 보너스 5개`;
+          if (p.total > 0) {
+            title.textContent = `진주 ${p.total}개를 받았어요!`;
+            sub.textContent = `${p.meters.toLocaleString()}m → 진주 ${p.pearls}개` + (p.bonus ? ` · 오늘 첫 수영 보너스 ${p.bonus}개` : '') + (p.capped ? ' · 하루 최대 5km까지' : '');
+          } else {
+            title.textContent = '오늘은 5km를 다 채웠어요';
+            sub.textContent = '하루 최대 5km까지 진주를 받아요 · 내일 또 만나요';
+          }
           actions.appendChild(button('좋아요', true, () => {
-            st.pearls += n; st.synced = true;
-            closeSheet(); refresh(); toast(`내 진주 ${st.pearls}개 · 우리 수영장 바닷길에 ${(U.TODAY.m / 1000).toFixed(2)}km를 보탰어요`);
+            st.pearls += p.total;
+            st.pearlDay = PEARLS.apply(ledgerNow(), p);
+            today = Object.assign({}, R, { pending: PEARLS.pending(R.summary.swims, st.pearlDay) });
+            closeSheet(); refresh();
+            toast(p.meters > 0 ? `내 진주 ${st.pearls}개 · 우리 수영장 바닷길에 ${(p.meters / 1000).toFixed(2)}km를 보탰어요` : `내 진주 ${st.pearls}개`);
           }));
-        }, 1000);
+        });
       }, { center: true, sticky: true });
     },
+    recheck() { ACTIONS.sync(); },
+    openHealthSettings() { H.openSettings().catch(() => toast('설정을 열 수 없어요')); },
+    installHealthConnect() { H.openInstall(); },
     setTab(k) { st.tab = k; refresh(); },
     equip(cat, id) {
       const it = U.ITEMS[cat].find((x) => x.id === id);
@@ -197,21 +244,80 @@
         sh.appendChild(text('div', 'sh-sub', '고른 캐릭터와 꾸민 아이템이 모두 초기화돼요. (데모용)'));
         const a = el('div', 'sh-actions');
         a.appendChild(button('취소', false, closeSheet));
-        a.appendChild(button('다시 하기', true, () => { st = clone(U.DEFAULT_STATE); try { localStorage.removeItem(KEY); } catch (e) { /* 무시 */ } closeSheet(); stack.length = 0; setHash('splash'); }));
+        a.appendChild(button('다시 하기', true, () => { st = clone(U.DEFAULT_STATE); try { localStorage.removeItem(KEY); } catch (e) { /* 무시 */ } closeSheet(); stack.length = 0; today = { status: 'loading' }; refreshToday(false); setHash('splash'); }));
         sh.appendChild(a);
       }, { center: true });
     },
   };
 
+  // ---------- 수영 기록 읽기 ----------
+  let syncing = false, reading = null, readingPrompt = false;
+  // prompt: 권한을 아직 안 물어봤으면 지금 물어봐요 (워치 기록 받기를 누를 때만 true)
+  function refreshToday(prompt) {
+    if (reading && (readingPrompt || !prompt)) return reading;
+    if (reading) return reading.then(() => refreshToday(prompt));
+    readingPrompt = !!prompt;
+    reading = readToday(prompt).then((T) => {
+      today = T; reading = null;
+      if (route === 'home' && !syncing) render(route, true);
+      return T;
+    });
+    return reading;
+  }
+  async function readToday(prompt) {
+    try {
+      if (NATIVE) {
+        const av = await H.availability();
+        if (!av.available) return { status: av.reason };
+        if (!st.health.asked) {
+          if (!prompt) return { status: 'idle' };
+          st.health.asked = true; save();
+          await H.requestPermission();
+        }
+      }
+      const summary = await H.getTodaySummary();
+      const ledger = ledgerNow();
+      const pending = PEARLS.pending(summary.swims, ledger);
+      let status = 'ok';
+      if (!summary.swims.length && !ledger.swims.length) status = (await H.hasRecentWorkouts()) ? 'none' : 'link-off';
+      else if (!pending.swims.length && pending.noDistance.length) status = 'no-distance';
+      return { status, summary, pending };
+    } catch (e) {
+      const code = e && e.code;
+      return { status: ['denied', 'update-required', 'unsupported'].includes(code) ? code : 'error', error: e };
+    }
+  }
+
   // ---------- 화면 맞추기 · 시작 ----------
+  // 안전 영역(노치 · 홈 인디케이터). Android는 Capacitor가 --safe-area-inset-*을 넣어줘요.
+  function inset(side) {
+    const p = document.createElement('div');
+    p.style.cssText = `position:fixed;left:0;top:0;width:0;visibility:hidden;height:var(--safe-area-inset-${side},env(safe-area-inset-${side},0px))`;
+    document.body.appendChild(p); const v = p.getBoundingClientRect().height; p.remove();
+    return v || 0;
+  }
   function fit() {
     // 390 × 844 비율을 지킨 채 창 안에 가장 크게
-    const z = Math.min(window.innerWidth / 390, window.innerHeight / 844);
+    const W = window.innerWidth, Hh = window.innerHeight;
+    let z = Math.min(W / 390, Hh / 844), top = 0;
+    if (NATIVE) {
+      // 앱: 시안의 상태바(44)와 탭바 아래 여백(26)이 실제 노치 · 홈 인디케이터 자리에 오도록
+      const t = inset('top'), b = inset('bottom');
+      z = Math.min(z, (Hh - t - b) / (844 - 44 - 26));
+      top = Math.max((Hh - 844 * z) / 2, t - 44 * z);
+    }
     document.documentElement.style.setProperty('--app-zoom', z.toFixed(4));
+    document.documentElement.style.setProperty('--app-top', top.toFixed(1) + 'px');
   }
+  if (NATIVE) document.body.classList.add('native', 'native-' + PLATFORM);
   window.addEventListener('resize', fit);
   window.addEventListener('hashchange', () => { closeSheet(); render(location.hash.slice(1)); });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeSheet(); });
   fit();
   render(ROUTES[location.hash.slice(1)] ? location.hash.slice(1) : 'splash');
+  refreshToday(false);
+  // 앱으로 돌아오면(설정에서 권한을 켜고 온 경우 등) 다시 읽어요
+  if (NATIVE && window.Capacitor.registerPlugin) {
+    window.Capacitor.registerPlugin('App').addListener('resume', () => { fit(); if (!syncing) refreshToday(false); });
+  }
 })();

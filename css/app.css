@@ -11,6 +11,11 @@ body.app { font-family: var(--font-family); letter-spacing: var(--tracking); col
 #layer { position: absolute; inset: 0; pointer-events: none; }
 #layer > * { pointer-events: auto; }
 
+/* 앱(Capacitor): 실제 상태바를 쓰고, 노치 · 홈 인디케이터를 피해 놓아요 (js/main.js fit) */
+body.app.native { align-items: flex-start; padding-top: var(--app-top, 0px); -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+body.app.native .statusbar > * { visibility: hidden; }
+body.app.native .name-input { -webkit-user-select: text; user-select: text; }
+
 /* 누를 수 있는 요소 */
 .tappable { cursor: pointer; transition: transform .12s ease, filter .12s ease; -webkit-tap-highlight-color: transparent; }
 .tappable:active { transform: scale(.97); }
