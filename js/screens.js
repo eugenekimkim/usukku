@@ -121,9 +121,8 @@
 
   function swim(ctx) {
     const st = ctx.st;
-    if (!ctx.live) return A.swimmer(false);
     const g = (cat, key) => { const it = st.equip[cat] && itemOf(cat, st.equip[cat]); return it ? it[key] : null; };
-    return A.swimmerFor(st.kind, st.fur, { cap: g('cap', 'cap'), goggle: g('goggle', 'goggle'), suit: g('suit', 'suit'), fin: g('fin', 'fin') });
+    return A.floater(st.kind, st.fur, { cap: g('cap', 'cap'), goggle: g('goggle', 'goggle'), suit: g('suit', 'suit'), fin: g('fin', 'fin') });
   }
 
   // ---------- 빌더: 피그마 오토레이아웃 → CSS flex ----------
@@ -560,7 +559,7 @@
       el.classList.add('deco');
       if (deco) tap(el, () => ctx.act('removeDeco', i), '장식 치우기');
     });
-    abs(scene, art(null, swim(ctx), 124), 212, 62).classList.add('swimmer');
+    abs(scene, art(null, swim(ctx), 130), 205, 39).classList.add('swimmer');
     const fr = st.follow.length ? st.follow : [];
     [[70, 206, 46], [262, 268, 42], [160, 318, 56]].forEach(([x, y, w], i) => { if (fr[i]) abs(scene, art(null, A.sea(fr[i]), w), x, y).classList.add('drift', 'd' + (i + 1)); });
     abs(scene, art(null, P.scene.sideSurface, 390), 0, 104);

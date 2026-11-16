@@ -224,5 +224,17 @@
   }
   const swimmer = (flip = false) => swimmerFor('rabbit', 'white', {}, flip);
 
-  window.ART = { animal, sea, school, seaSilhouette, seal, swimmer, swimmerFor, INK };
+  // 수영하는 모습: 정면 캐릭터를 그대로 가슴까지 물에 담가요 (음파 표정 · 가는 쪽으로 기울기 · 뒤쪽 물보라)
+  // 오른쪽으로 가는 그림이에요. 왼쪽으로 갈 때는 바깥에서 좌우로 뒤집어요.
+  function floater(kind, fur, opts = {}) {
+    let c = animal(kind, fur, 'puff', opts);
+    c = c.replace('<svg viewBox="-10 -4 140 182"', '<svg viewBox="-10 -4 140 182" x="25" y="-6" width="100" height="130"');
+    const wave = 'M0 80c12.5-6 25 6 37.5 0s25-6 37.5 0 25 6 37.5 0 25-6 37.5 0';
+    const water = `<defs><linearGradient id="flw" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8CCBFA" stop-opacity=".65"/><stop offset="1" stop-color="#8CCBFA" stop-opacity="0"/></linearGradient></defs><path d="${wave}V120H0z" fill="url(#flw)"/><path d="${wave}" stroke="#FFFFFF" stroke-width="3" fill="none" stroke-linecap="round"/>`;
+    const splash = `<g fill="#FFFFFF" stroke="#7FC4FF" stroke-width="1.6"><circle cx="20" cy="70" r="5"/><circle cx="9" cy="61" r="3.5"/><circle cx="27" cy="57" r="2.6"/><circle cx="4" cy="74" r="2.4"/></g><path d="M16 82c-5 0-10-3-13-7M27 84c-4 2-9 2-12 0" stroke="#FFFFFF" stroke-width="3" fill="none" stroke-linecap="round"/>`;
+    const bub = `<g fill="none" stroke="#FFFFFF" stroke-width="1.6" opacity=".9"><circle cx="128" cy="38" r="3"/><circle cx="136" cy="28" r="2"/></g>`;
+    return `<svg viewBox="0 0 150 120" xmlns="http://www.w3.org/2000/svg"><g transform="rotate(8 75 80)">${c}</g>${water}${splash}${bub}</svg>`;
+  }
+
+  window.ART = { animal, sea, school, seaSilhouette, seal, swimmer, swimmerFor, floater, INK };
 })();
