@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">우수꾸</string>
+    <string name="title_activity_main">우수꾸</string>
+    <string name="package_name">kr.co.itso.usukku</string>
+    <string name="custom_url_scheme">kr.co.itso.usukku</string>
+</resources>

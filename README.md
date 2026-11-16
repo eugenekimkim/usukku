@@ -9,7 +9,7 @@
 - **앱**: `index.html` — 스플래시 → 로그인 → 캐릭터 선택 → 수영장 선택 → 메인 탭
 - **디자인 시안**: `about/index.html` — 화면 13개를 플로우별로 모아 본 갤러리
 
-데모 데이터로 동작하고, 고른 캐릭터와 꾸민 아이템은 브라우저(localStorage)에 저장돼요. 전체 메뉴 > 데모 처음부터 다시로 초기화할 수 있어요.
+브라우저에서는 데모 데이터로 동작하고, 고른 캐릭터와 꾸민 아이템은 브라우저(localStorage, `usukku:v4`)에 저장돼요. 전체 메뉴 > 데모 처음부터 다시로 초기화할 수 있어요. iOS · Android 앱으로 실행하면 워치로 잰 실제 수영 기록을 읽어요(아래 [앱으로 실행하기](#앱으로-실행하기)).
 
 ## 앱에서 되는 것
 
@@ -34,6 +34,12 @@
 | `fonts/suite.css` | SUITE Regular · Medium · Bold · ExtraBold (SIL OFL 1.1, `fonts/SUITE-LICENSE.txt`) |
 | `js/screens.js` | 피그마 오토레이아웃을 옮긴 빌더(`al` · `txt` · `art`), 카탈로그, 화면 13개 (`live`면 앱, 아니면 시안 그대로) |
 | `js/main.js` | 앱: 해시 라우팅, 상태 저장, 진주 받기 · 상점 · 바텀시트 · 토스트 |
+| `js/health.js` | 수영 기록 읽기: HealthKit · Health Connect, 브라우저는 데모 기록. 화면 코드는 이 모듈만 불러요 |
+| `js/pearls.js` | 진주 규칙(100m마다 1개 · 첫 수영 +5 · 하루 5km)과 진주를 준 운동 원장 |
+| `capacitor.config.json` · `package.json` · `scripts/build-web.mjs` | Capacitor 설정, 웹 파일을 `www/`로 복사 |
+| `ios/` · `android/` | Capacitor 네이티브 프로젝트 (`ios/App/App/UsukkuHealthPlugin.swift`: 수영 거리용 작은 HealthKit 플러그인) |
+| `native/privacypolicy.html` | Health Connect 권한 화면에서 여는 건강 데이터 이용 안내(초안) |
+| `tests/` | 진주 규칙 · 기록 읽기 테스트 (`npm test`) |
 | `js/art.js` | 동물 친구 · 바다 친구 · 물개 코치 SVG 생성기 |
 | `js/props.js` | 아이콘, 소품, 수영장 장면 SVG |
 | `js/gallery.js` | 갤러리 렌더링, 크게 보기, 캐릭터 시트, 컬러 · 텍스트 스타일 표 |
@@ -79,5 +85,50 @@
 | 스페셜 그라디언트 | `#FFD6F2 → #DDF8FF → #C9D4FF → #FFFCDE` |
 
 텍스트: SUITE, 자간 -2.5%.
+
+## 앱으로 실행하기
+
+웹 코드는 한 벌이에요. `npm run build:web`이 `index.html` · `css/` · `js/` · `fonts/`를 `www/`로 복사하고(디자인 갤러리 `about/`은 빼요), Capacitor가 그걸 iOS · Android 앱으로 감싸요. `www/`는 저장소에 올리지 않아요.
+
+### 준비물
+
+- Node.js 20 이상
+- iOS: Mac + Xcode 16 이상 (Apple 개발자 계정 — 실제 iPhone에 설치할 때)
+- Android: Android Studio (Android SDK 36, JDK 21)
+
+### 명령어 순서
+
+```bash
+npm install            # 1. 설치
+npm run build:web      # 2. 웹 파일을 www/로 복사
+npx cap sync           # 3. www/와 플러그인을 ios/ · android/에 반영
+npx cap open ios       # 4-a. Xcode에서 ▶ 실행 (시뮬레이터 또는 연결한 iPhone)
+npx cap open android   # 4-b. Android Studio에서 ▶ 실행 (에뮬레이터 또는 연결한 폰)
+```
+
+`npm run ios` / `npm run android`는 2~4번을 한 번에 해요. 웹 코드를 고친 뒤에는 2~3번(`npm run sync`)만 다시 하면 돼요. 진주 규칙 테스트는 `npm test`.
+
+### 실제 기기에서 테스트하기
+
+- **iPhone**: Xcode > App 타깃 > Signing & Capabilities에서 Team을 내 Apple 개발자 계정으로 고르고(HealthKit 기능은 이미 켜져 있어요), iPhone을 USB로 연결해 ▶ 실행해요. 처음 한 번은 iPhone 설정 > 일반 > VPN 및 기기 관리에서 개발자를 신뢰해야 해요. 시뮬레이터에서는 건강 앱 > 둘러보기에서 '운동'을 찾아 오른쪽 위 '데이터 추가'로 활동 유형 '수영', 거리, 시작 · 끝 시각을 넣어 확인해요.
+- **Android**: 폰의 설정 > 휴대전화 정보 > 소프트웨어 정보에서 빌드번호를 7번 눌러 개발자 옵션을 켜고, 개발자 옵션 > USB 디버깅을 켠 뒤 USB로 연결해 ▶ 실행해요. 에뮬레이터는 Google Play가 있는 이미지에서 Health Connect 앱으로 운동 · 거리 기록을 넣어 확인해요.
+
+### 갤럭시워치 사용자가 켜야 할 설정
+
+갤럭시워치 기록은 삼성 헬스 → Health Connect → 우수꾸 순서로 들어와요.
+
+1. 삼성 헬스 > 설정 > **Health Connect** 연동을 켜고, 운동 · 거리 쓰기를 허용해요.
+2. 삼성 헬스 > 설정 > **삼성 계정 동기화**를 켜요 (워치 기록이 폰으로 넘어와야 해요).
+3. 우수꾸에서 '워치 기록 받기'를 누르면 Health Connect 권한 창이 떠요. 운동 · 거리 읽기를 허용해요.
+
+Android 13 이하는 Play 스토어에서 Health Connect 앱을 설치해야 해요(앱이 없으면 우수꾸가 설치 화면으로 안내해요).
+
+### 어떻게 읽나요
+
+- 권한은 앱을 처음 켤 때가 아니라 '워치 기록 받기'를 처음 누를 때 물어봐요.
+- 오늘(기기 시간대 0시부터 지금까지) 시작한 수영 운동만 읽어요. 자정을 넘긴 수영은 시작한 날 기록이에요.
+- 운동에 거리가 없으면 그 시간대의 수영 거리 기록을 따로 읽어요. 그래도 없으면 시간만 보여주고 진주는 주지 않아요.
+- 같은 운동 ID이거나 시간이 절반 이상 겹치면 같은 수영으로 보고 한 번만 세요.
+- 진주를 준 운동은 날짜와 함께 원장에 남겨서 두 번 받지 않아요. 같은 날 다시 헤엄치면 새 거리만큼만 더 받고, 첫 수영 보너스는 다시 주지 않아요.
 
 > 아티팩트 안에서는 실제 위치(GPS)를 쓸 수 없어서, 현재 위치 찾기와 인증은 데모 위치(성내동)로 동작해요.
