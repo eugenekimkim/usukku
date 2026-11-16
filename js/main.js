@@ -170,7 +170,7 @@
         const sub = text('div', 'sh-sub', `${U.POOLS[i][0]} 근처에 있는지 확인하고 있어요`); sh.appendChild(sub);
         const a = el('div', 'sh-actions'); sh.appendChild(a);
         setTimeout(() => {
-          t.textContent = '인증 완료!'; sub.textContent = `이제 ${U.POOLS[i][0]} 공동 리프에 함께해요`;
+          t.textContent = '인증 완료!'; sub.textContent = `이제 ${U.POOLS[i][0]} 바닷길에 함께해요`;
           a.appendChild(button('좋아요', true, () => { st.verified[i] = true; closeSheet(); refresh(); }));
         }, 1000);
       }, { center: true, sticky: true });

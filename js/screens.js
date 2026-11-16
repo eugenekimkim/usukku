@@ -522,17 +522,6 @@
     txt(rc, `멤버 ${POOLS[st.pool][2]}명 · 섬 간격 ${r.gap}km (멤버 1명당 ${KM_PER_MEMBER}km)`, 'CR', C.sub);
     const rw0 = al(rc, 'H', { gap: 8, pad: [10, 12], fill: '#FFFFFF', radius: 12, align: 'CENTER', fillW: true });
     art(rw0, P.icon.pearl, 22); txt(rw0, `${r.nextName}에 닿으면 이번 달 인증하고 수영한 멤버 모두 진주 30개 + 새 바다 친구`, 'CR', C.ink, { fillW: true });
-    // 공동 리프: 지나온 섬의 기념품이 쌓이는 곳 (세로 1.5배 · 물 배경 · 왕복하는 내 캐릭터)
-    const rf = al(b, 'V', { name: 'shared-reef', gap: 8, pad: [16, 16], fill: C.card, radius: 20, fillW: true });
-    const rfh = al(rf, 'H', { justify: 'SPACE_BETWEEN', align: 'CENTER', fillW: true }); txt(rfh, '공동 리프', 'H', C.ink); pill(rfh, `기념품 ${Math.floor(r.at)}개`, C.soft, C.primary, 'L', [3, 8]);
-    if (ctx.live) {
-      const tank = al(rf, 'V', { name: 'reef-tank', w: 318, h: 129, radius: 16, clip: true, cls: 'reef-tank' });
-      abs(tank, art(null, P.scene.reefWater, 318), 0, 0);
-      abs(tank, art(null, P.scene.reef, 318), 0, 43);
-      const sw = al(null, 'V', { w: 70, cls: 'reef-swimmer' }); art(sw, swim(ctx), 70);
-      abs(tank, sw, 124, 40);
-    } else art(rf, P.scene.reef, 318);
-    txt(rf, '섬을 지날 때마다 그 섬의 산호가 리프에 자라요', 'CR', C.sub);
     const bc = al(b, 'V', { name: 'pool-battle', gap: 12, pad: [18, 18], fill: C.card, radius: 20, fillW: true });
     const bh = al(bc, 'H', { justify: 'SPACE_BETWEEN', align: 'CENTER', fillW: true }); txt(bh, '10월 수영장 대결', 'H', C.ink); pill(bh, 'D-9', C.pinkL, C.coral, 'L', [4, 8]);
     [[`${POOLS[st.pool][0]} (우리)`, '312km', 100, C.btn, C.soft, C.primary], ['바람결 수영장', '287km', 92, C.pink, C.pinkL, C.coral]].forEach(([n, km, pct, col, trk, tc]) => {
