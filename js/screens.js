@@ -550,7 +550,7 @@
     const st = ctx.st;
     const deco = ctx.live && st.decorate;
     const s = screen('04-2', { status: false });
-    const scene = al(s, 'V', { name: 'pool-side-scene', fillW: true, h: 470, clip: true, cls: 'side-scene' + (deco ? ' decorating' : '') });
+    const scene = al(s, 'V', { name: 'pool-side-scene', fillW: true, h: 320, clip: true, cls: 'side-scene' + (deco ? ' decorating' : '') });
     abs(scene, art(null, P.scene.sideBg, 390), 0, 0);
     // 바닥 장식 (상태에서 그림)
     (st.placed || DEFAULT_PLACED).forEach(([k, x, c], i) => {
@@ -561,7 +561,7 @@
     });
     abs(scene, art(null, swim(ctx), 130), 205, 39).classList.add('swimmer');
     const fr = st.follow.length ? st.follow : [];
-    [[70, 206, 46], [262, 268, 42], [160, 318, 56]].forEach(([x, y, w], i) => { if (fr[i]) abs(scene, art(null, A.sea(fr[i]), w), x, y).classList.add('drift', 'd' + (i + 1)); });
+    [[70, 160, 44], [262, 196, 40], [150, 222, 40]].forEach(([x, y, w], i) => { if (fr[i]) abs(scene, art(null, A.sea(fr[i]), w), x, y).classList.add('drift', 'd' + (i + 1)); });
     abs(scene, art(null, P.scene.sideSurface, 390), 0, 104);
     const play = al(null, 'H', { gap: 6, pad: [6, 12], fill: C.card, op: 0.92, radius: 999, align: 'CENTER' }); art(play, P.icon.play, 10); txt(play, '왕복 중 · 실시간', 'L', C.ink, { size: 12 });
     abs(scene, play, 16, 122);

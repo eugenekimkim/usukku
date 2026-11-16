@@ -88,22 +88,24 @@
     const weed = (x) => { const d = `M${x} 432c-6-10 6-16 0-26s6-16 0-24M${x + 10} 432c-5-9 5-14 0-22`; return `<path d="${d}" stroke="${INK}" stroke-width="7.5" stroke-linecap="round" fill="none"/><path d="${d}" stroke="#7CC28A" stroke-width="4.2" stroke-linecap="round" fill="none"/>`; };
     const shell = (x, c) => `<path d="M${x - 9} 431c0-8 4-13 9-13s9 5 9 13z" fill="${c}" stroke="${INK}" stroke-width="2.4" stroke-linejoin="round"/><path d="M${x - 4} 431v-7M${x} 431v-10M${x + 4} 431v-7" stroke="${INK}" stroke-width="1.2" stroke-opacity=".5"/>`;
     const star = (x, y, s = 1) => `<g transform="translate(${x} ${y}) scale(${s})"><path d="M0 -12l3.6 7.8 8.4 1.2-6 6 1.8 8.4-7.8-4.2-7.8 4.2 1.8-8.4-6-6 8.4-1.2z" fill="#FFA98A" stroke="${INK}" stroke-width="2.2" stroke-linejoin="round"/><circle cx="-2.2" cy="-1" r="1.1" fill="${INK}"/><circle cx="2.2" cy="-1" r="1.1" fill="${INK}"/></g>`;
-    scene.sideBg = `<svg viewBox="0 0 390 470" xmlns="http://www.w3.org/2000/svg">
+    scene.sideBg = `<svg viewBox="0 0 390 320" xmlns="http://www.w3.org/2000/svg">
 <defs><linearGradient id="sideW" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#A8DCFF"/><stop offset="1" stop-color="#5FAEF0"/></linearGradient></defs>
-<rect width="390" height="470" fill="#EAF6FF"/><rect y="74" width="390" height="22" fill="#D7EBFB"/><path d="M0 74h390" stroke="#C3DCF2" stroke-width="2"/>
+<rect width="390" height="320" fill="#EAF6FF"/><rect y="74" width="390" height="22" fill="#D7EBFB"/><path d="M0 74h390" stroke="#C3DCF2" stroke-width="2"/>
 <path d="M0 24Q195 72 390 24" stroke="#9DB2C7" stroke-width="1.5" fill="none"/>${flags.join('')}
 <path d="M58 60h274" stroke="#456AFF" stroke-width="2.4" stroke-dasharray="6 6" stroke-linecap="round" stroke-opacity=".75"/><path d="M64 54l-8 6 8 6M326 54l8 6-8 6" stroke="#456AFF" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-opacity=".75"/>
-${rope}<path d="${wave} V470 H0 Z" fill="url(#sideW)"/>
-<path d="M40 100l50 330h40L70 100zM190 100l40 330h30l-50-330zM300 100l30 330h24l-40-330z" fill="#FFFFFF" fill-opacity=".12"/>
-<rect x="0" y="94" width="12" height="376" fill="#CFE6FA"/><rect x="378" y="94" width="12" height="376" fill="#CFE6FA"/>
-<path d="M0 140h12M0 190h12M0 240h12M0 290h12M0 340h12M0 390h12M378 140h12M378 190h12M378 240h12M378 290h12M378 340h12M378 390h12" stroke="#B4D3EE" stroke-width="1.5"/>
-<rect x="12" y="438" width="366" height="32" fill="#CFE8FF"/><path d="M12 438h366" stroke="#B4D3EE" stroke-width="2"/><path d="M60 452h270M60 446v12M330 446v12" stroke="#2F5FBF" stroke-width="4" stroke-opacity=".55" stroke-linecap="round"/>
-<path d="M14 440C70 414 130 422 196 430C258 420 318 412 376 440Z" fill="#F6E3B4"/>
-<circle cx="150" cy="200" r="3" fill="none" stroke="#FFFFFF" stroke-opacity=".7" stroke-width="1.5"/><circle cx="156" cy="182" r="2" fill="none" stroke="#FFFFFF" stroke-opacity=".7" stroke-width="1.4"/><circle cx="312" cy="230" r="3.5" fill="none" stroke="#FFFFFF" stroke-opacity=".7" stroke-width="1.5"/><circle cx="318" cy="210" r="2.2" fill="none" stroke="#FFFFFF" stroke-opacity=".7" stroke-width="1.4"/>
+${rope}<path d="${wave} V320 H0 Z" fill="url(#sideW)"/>
+<path d="M40 100l28 180h34L70 100zM190 100l24 180h26l-30-180zM300 100l18 180h22l-24-180z" fill="#FFFFFF" fill-opacity=".12"/>
+<rect x="0" y="94" width="12" height="226" fill="#CFE6FA"/><rect x="378" y="94" width="12" height="226" fill="#CFE6FA"/>
+<path d="M0 140h12M0 190h12M0 240h12M378 140h12M378 190h12M378 240h12" stroke="#B4D3EE" stroke-width="1.5"/>
+<rect x="12" y="288" width="366" height="32" fill="#CFE8FF"/><path d="M12 288h366" stroke="#B4D3EE" stroke-width="2"/><path d="M60 302h270M60 296v12M330 296v12" stroke="#2F5FBF" stroke-width="4" stroke-opacity=".55" stroke-linecap="round"/>
+<path d="M14 290C70 264 130 272 196 280C258 270 318 262 376 290Z" fill="#F6E3B4"/>
+<circle cx="150" cy="200" r="3" fill="none" stroke="#FFFFFF" stroke-opacity=".7" stroke-width="1.5"/><circle cx="156" cy="182" r="2" fill="none" stroke="#FFFFFF" stroke-opacity=".7" stroke-width="1.4"/><circle cx="312" cy="200" r="3.5" fill="none" stroke="#FFFFFF" stroke-opacity=".7" stroke-width="1.5"/><circle cx="318" cy="182" r="2.2" fill="none" stroke="#FFFFFF" stroke-opacity=".7" stroke-width="1.4"/>
 </svg>`;
     // 바닥 장식 (MY POOL 꾸미기): 장면 좌표 x 기준으로 놓는 조각
     const wrapD = (vb, inner) => `<svg viewBox="${vb}" xmlns="http://www.w3.org/2000/svg">${inner}</svg>`;
-    scene.deco = (k, c) => {
+    const UP = 150; // 바닥을 얕게: 장식 그림은 그대로, 놓는 위치만 위로
+    scene.deco = (k, c) => { const d = deco0(k, c); if (d && k !== 'ball') d.top -= UP; return d; };
+    const deco0 = (k, c) => {
       if (k === 'weed') return { svg: wrapD('0 376 32 60', weed(10)), w: 32, top: 376, ox: 10 };
       if (k === 'coral') return { svg: wrapD('0 386 34 50', branch(14, c || '#FF9EC4', 34)), w: 34, top: 386, ox: 14 };
       if (k === 'shell') return { svg: wrapD('0 414 24 20', shell(12, c || '#FFD978')), w: 24, top: 414, ox: 12 };
