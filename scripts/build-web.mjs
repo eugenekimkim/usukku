@@ -13,7 +13,7 @@ for (const f of ['index.html', 'css', 'js', 'fonts', 'legal']) cpSync(join(root,
 mkdirSync(join(out, 'js', 'vendor'), { recursive: true });
 cpSync(join(root, 'node_modules', '@capacitor', 'core', 'dist', 'capacitor.js'), join(out, 'js', 'vendor', 'capacitor.js'));
 const html = readFileSync(join(out, 'index.html'), 'utf8');
-const tag = '<script src="js/health.js"></script>';
-if (!html.includes(tag)) throw new Error('index.html에 js/health.js가 없어요');
+const tag = '<script src="js/art.js"></script>'; // 앱 스크립트 맨 앞(위치 · 건강 모듈보다 먼저)
+if (!html.includes(tag)) throw new Error('index.html에 js/art.js가 없어요');
 writeFileSync(join(out, 'index.html'), html.replace(tag, '<script src="js/vendor/capacitor.js"></script>\n  ' + tag));
 console.log('www/ 준비 완료: index.html, css/, js/, fonts/, legal/, js/vendor/capacitor.js');

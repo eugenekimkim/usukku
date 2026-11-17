@@ -41,6 +41,11 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <!-- 위치: 가까운 수영장 찾기 · 수영장 인증 (앱을 쓰는 동안만, 폰 밖으로 보내지 않아요) -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-feature android:name="android.hardware.location.gps" android:required="false" />
+
     <!-- Health Connect: 수영 운동과 거리만 읽어요 -->
     <uses-permission android:name="android.permission.health.READ_EXERCISE" />
     <uses-permission android:name="android.permission.health.READ_DISTANCE" />

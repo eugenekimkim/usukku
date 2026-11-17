@@ -76,8 +76,20 @@ const F = {
 async function fromDataGoKr(key) {
   if (!key) { console.log('DATA_GO_KR_KEY 없음 → 공공데이터포털 수영장업은 건너뛰어요'); return { pools: [], sample: [] }; }
   const out = [], sample = [];
+  // 포털에는 기본 주소만 있어서, 첫 쪽에서 실제 경로를 찾아요
+  const BASE = 'https://apis.data.go.kr/1741000/swimming_pools';
+  let path = null;
+  for (const cand of ['', '/info', '/getInfo', '/list']) {
+    try {
+      const res = await fetch(`${BASE}${cand}?serviceKey=${encodeURIComponent(key)}&pageNo=1&numOfRows=1&returnType=json`);
+      const body = await res.text();
+      console.log(`수영장업 경로 '${cand || '/'}': HTTP ${res.status} ${body.slice(0, 160).replace(/\s+/g, ' ')}`);
+      if (res.ok && findItems(JSON.parse(body)).length) { path = cand; break; }
+    } catch (e) { console.warn(`수영장업 경로 '${cand}' 실패: ${e.message}`); }
+  }
+  if (path == null) { console.warn('수영장업 API 경로를 찾지 못했어요 (위 응답을 확인해 주세요)'); return { pools: [], sample }; }
   for (let page = 1; page <= 200; page++) {
-    const url = `https://apis.data.go.kr/1741000/swimming_pools?serviceKey=${encodeURIComponent(key)}&pageNo=${page}&numOfRows=100&returnType=json`;
+    const url = `${BASE}${path}?serviceKey=${encodeURIComponent(key)}&pageNo=${page}&numOfRows=100&returnType=json`;
     let json;
     try {
       const res = await fetch(url);
@@ -137,6 +149,6 @@ const data = {
   counts: { osm: osm.pools.length, go: go.pools.length, merged: pools.length },
   pools: pools.map((p) => [p.id, p.name, r5(p.lat), r5(p.lng), p.dong, p.addr]),
 };
-writeFileSync(OUT, `// 자동 생성 파일 — scripts/build-pools.mjs (직접 고치지 마세요)\nwindow.USUKKU_POOL_DATA = ${JSON.stringify(data)};\n`);
+writeFileSync(OUT, `// 자동 생성 파일 — scripts/build-pools.mjs (직접 고치지 마세요)\n// OpenStreetMap에서 온 항목: © OpenStreetMap 기여자, ODbL 1.0 (https://www.openstreetmap.org/copyright) · 이 목록도 ODbL로 제공해요\nwindow.USUKKU_POOL_DATA = ${JSON.stringify(data)};\n`);
 writeFileSync(SAMPLE, JSON.stringify({ osm: osm.sample, go: go.sample }, null, 2));
 console.log(`js/pools-data.js: ${pools.length}개 (OSM ${osm.pools.length}, 수영장업 ${go.pools.length})`);

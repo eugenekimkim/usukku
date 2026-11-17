@@ -62,6 +62,8 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>가까운 수영장을 찾고 수영장 인증을 할 때만 위치를 써요. 위치는 이 폰 밖으로 보내지 않아요.</string>
 	<key>NSHealthShareUsageDescription</key>
 	<string>워치로 잰 수영 기록을 읽어서 진주를 드리고 우리 수영장 바닷길에 거리를 보태요.</string>
 	<key>UIViewControllerBasedStatusBarAppearance</key>

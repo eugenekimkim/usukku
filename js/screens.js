@@ -102,6 +102,8 @@
     poolChanged: null, verified: { 0: true }, located: false,
     history: null, // 날짜별 기록 { 'YYYY-MM-DD': { m, min, n } } (js/progress.js) · null이면 브라우저 데모 기록을 채워요
     islands: [], // 도착 보상을 받은 섬 번호
+    locConsent: null, // 위치기반서비스 이용약관 동의 날짜
+    myPool: null, // 앱에서 고른 실제 수영장 { id, name, dong, addr, lat, lng, lane } (js/place.js)
   };
   // 앱(iOS · Android) 첫 상태: 진주 0개, 기본 아이템, 바다 친구 없음
   const FRESH_STATE = {
@@ -129,6 +131,15 @@
   const myStats = (ctx) => PR().stats(ctx.st.history || {});
   const myRoute = (ctx) => PR().myRoute(myStats(ctx).km);
   const km1 = (n) => (Math.round(n * 10) / 10).toLocaleString();
+  // 내 수영장: 앱은 고른 실제 수영장(st.myPool), 시안 · 데모는 POOLS
+  const realPools = (ctx) => !!(ctx.live && window.Place && window.Place.ready());
+  function curPool(ctx) {
+    const st = ctx.st, m = ctx.live && st.myPool;
+    if (m) return { id: m.id, name: m.name, dong: m.dong || '', lane: m.lane || 25, meta: `${m.lane || 25}m 레인`, members: null, real: true };
+    const p = POOLS[st.pool] || POOLS[0];
+    return { id: st.pool, name: p[0], dong: p[3], lane: +((/(\d+)m/.exec(p[1]) || [0, 25])[1]), meta: p[1].split(' · ')[1], members: p[2], real: false };
+  }
+  const isVerified = (ctx) => { const c = curPool(ctx); return !!(ctx.st.verified && ctx.st.verified[c.id]); };
   const rewardLabel = (ctx, cat, it) => (ctx.live && PR().REWARDS[cat + ':' + it.id] ? PR().REWARDS[cat + ':' + it.id].label : it.reward);
 
   const furName = (hex) => (FURS.find((f) => f[0] === hex) || [0, ''])[1];
@@ -390,6 +401,7 @@
   // ---------- 00-2 수영장 선택 ----------
   S['00-2'] = (ctx) => {
     const st = ctx.st;
+    if (realPools(ctx)) return poolPickReal(ctx);
     const s = screen('00-2');
     const b = al(s, 'V', { name: 'content', gap: 14, pad: [10, 20, 34, 20], fillW: true, grow: true });
     const top = al(b, 'H', { gap: 8, align: 'CENTER', fillW: true });
@@ -421,6 +433,103 @@
     cta(b, `${POOLS[st.pool][0]}으로 시작하기`, () => ctx.act('finishOnboarding'));
     return s;
   };
+
+  // 앱: 실제 수영장 목록 · 검색 (js/place.js). 위치는 이 폰 안에서만 써요.
+  function poolSearch(parent, ctx) {
+    const sr = al(parent, 'H', { gap: 8, pad: [0, 14], fill: C.card, radius: 14, stroke: C.line, align: 'CENTER', fillW: true, h: 46 });
+    art(sr, P.icon.search, 18);
+    const inp = document.createElement('input');
+    inp.className = 'tx ts-BR name-input pool-query'; inp.type = 'search'; inp.value = ctx.poolQuery || ''; inp.placeholder = '수영장 이름이나 동네로 검색'; inp.setAttribute('aria-label', '수영장 검색');
+    inp.addEventListener('input', () => ctx.act('poolQuery', inp.value));
+    sr.appendChild(inp); inp.style.flex = '1 1 0';
+    return sr;
+  }
+  function poolRows(parent, ctx, list, opts = {}) {
+    const st = ctx.st, curId = st.myPool && st.myPool.id;
+    const box = al(parent, 'V', { gap: opts.cards ? 8 : 0, fillW: true, fill: opts.cards ? null : C.card, radius: opts.cards ? 0 : 20, pad: opts.cards ? null : [4, 0], name: 'pool-list' });
+    if (!list.length) { const e = al(box, 'V', { pad: [16, 16], fillW: true, align: 'CENTER' }); txt(e, ctx.poolQuery ? '찾는 수영장이 없어요' : '근처에서 수영장을 찾지 못했어요', 'CM', C.sub); return box; }
+    list.forEach((p, i) => {
+      const sel = p.id === curId;
+      const r = opts.cards
+        ? al(box, 'H', { gap: 12, pad: [12, 14], fill: C.card, radius: 16, align: 'CENTER', fillW: true, stroke: sel ? C.btn : C.line, sw: sel ? 2 : 1 })
+        : al(box, 'H', { gap: 12, pad: [12, 16], align: 'CENTER', fillW: true });
+      if (!opts.cards) divider(r, i);
+      if (opts.cards) { const ic = al(r, 'H', { fill: sel ? C.soft : C.paleBlue, radius: 12, w: 40, h: 40, align: 'CENTER', justify: 'CENTER' }); art(ic, P.icon.wave(sel ? C.primary : C.mute), 20); }
+      const col = al(r, 'V', { gap: 2, grow: true });
+      const t = al(col, 'H', { gap: 6, align: 'CENTER', fillW: true }); txt(t, p.name, 'BM', opts.locked && !sel ? C.mute : C.ink, { grow: true }).style.overflow = 'hidden';
+      if (p.dong) pill(t, p.dong, sel ? C.soft : C.paleBlue, sel ? C.primary : C.sub, 'L', [2, 6]);
+      const showKm = ctx.here && !ctx.here.demo; // 현재 위치를 쓴 뒤에만 거리를 보여줘요
+      txt(col, [showKm ? window.Place.fmtKm(p.km) : '', p.addr].filter(Boolean).join(' · ') || ' ', 'CR', C.sub, { size: 12, fillW: true }).style.whiteSpace = 'nowrap';
+      const rd = al(r, 'H', { fill: sel ? C.btn : C.card, stroke: sel ? null : C.mute, sw: 1.5, radius: 11, w: 22, h: 22, align: 'CENTER', justify: 'CENTER' }); if (sel) dot(rd, 8, '#FFFFFF');
+      tap(r, () => ctx.act(opts.action || 'pickPool', p.id), p.name);
+    });
+    return box;
+  }
+  function poolMap(parent, ctx, h) {
+    const map = al(parent, 'V', { name: 'map', radius: 20, fillW: true, h, clip: true });
+    abs(map, art(null, P.scene.map, 350), 0, 0);
+    const cur = ctx.st.myPool;
+    if (cur) abs(map, (() => { const c = al(null, 'H', { gap: 4, pad: [5, 10], fill: C.navy, radius: 999, align: 'CENTER' }); txt(c, cur.name, 'L', '#FFFFFF'); return c; })(), 24, 30);
+    const loc = al(null, 'H', { gap: 6, pad: [8, 12], fill: C.card, radius: 999, align: 'CENTER' }); art(loc, P.icon.locate, 16);
+    txt(loc, ctx.here ? '현재 위치 기준 · 다시 찾기' : '현재 위치로 찾기', 'CM', C.primary, { weight: 700 });
+    tap(loc, () => ctx.act('locate'), '현재 위치로 찾기');
+    abs(map, loc, 12, h - 48);
+    return map;
+  }
+  function poolPickReal(ctx) {
+    const s = screen('00-2');
+    const b = content(s, [10, 20, 34, 20], 14);
+    const top = al(b, 'H', { gap: 8, align: 'CENTER', fillW: true });
+    iconBtn(top, P.icon.back, 22, () => ctx.go('pick'), '뒤로');
+    steps(top, 2).style.flex = '1 1 0';
+    const tt = al(b, 'V', { gap: 4, fillW: true });
+    txt(tt, '자주 다니는 수영장을 골라주세요', 'T', C.ink, { fillW: true });
+    txt(tt, '현재 위치에서 가까운 수영장이에요.\n위치는 이 폰 안에서 수영장 찾기와 인증에만 써요.', 'CR', C.sub, { fillW: true });
+    poolSearch(b, ctx);
+    poolMap(b, ctx, 150);
+    poolRows(b, ctx, ctx.nearby.slice(0, ctx.poolQuery ? 20 : 5), { cards: true });
+    const add = al(b, 'H', { gap: 4, align: 'CENTER' }); txt(add, '찾는 수영장이 없나요?', 'CR', C.sub); const reg = txt(add, '이름으로 검색해 보세요', 'CM', C.primary); tap(reg, () => { const q = document.querySelector('.pool-query'); if (q) q.focus(); }, '검색하기');
+    const cur = ctx.st.myPool;
+    cta(b, cur ? `${cur.name}으로 시작하기` : '수영장을 골라주세요', () => ctx.act('finishOnboarding'));
+    return s;
+  }
+  function poolSetReal(ctx) {
+    const st = ctx.st, cur = curPool(ctx), ok = isVerified(ctx);
+    const locked = st.poolChanged === monthKey();
+    const s = screen('09');
+    const b = content(s, [6, 20, 34, 20], 14);
+    const h = al(b, 'H', { gap: 8, align: 'CENTER', fillW: true }); iconBtn(h, P.icon.back, 24, () => ctx.back(), '뒤로'); txt(h, '내 수영장 설정', 'T', C.ink);
+    txt(b, '이사했거나 다니는 수영장이 바뀌었다면 여기서 바꿔요.\n내 수영장은 한 곳이고, 한 번 바꾸면 그달에는 다시 못 바꿔요.', 'CR', C.sub, { fillW: true });
+    const now = al(b, 'H', { gap: 12, pad: [14, 16], fill: C.navy, radius: 18, align: 'CENTER', fillW: true });
+    const ic = al(now, 'H', { fill: '#2E37B8', radius: 12, w: 40, h: 40, align: 'CENTER', justify: 'CENTER' }); art(ic, P.icon.wave('#FFFFFF'), 20);
+    const nc = al(now, 'V', { gap: 2, grow: true });
+    txt(nc, '지금 내 수영장', 'L', '#BFD4FF');
+    const nt = al(nc, 'H', { gap: 6, align: 'CENTER' }); txt(nt, cur.name, 'BM', '#FFFFFF'); if (ok) pill(nt, '인증', '#FFFFFF', C.primary, 'L', [2, 6]);
+    txt(nc, [cur.dong, (st.myPool && st.myPool.addr) || ''].filter(Boolean).join(' · ') || ' ', 'CR', '#BFD4FF', { size: 12, fillW: true });
+    // 레인 길이 (MY POOL 왕복 수에 써요)
+    const ln = al(b, 'H', { gap: 8, pad: [12, 14], fill: C.card, radius: 16, align: 'CENTER', fillW: true });
+    txt(ln, '레인 길이', 'BM', C.ink, { grow: true });
+    [25, 50].forEach((m) => { const on = cur.lane === m; const c = al(ln, 'H', { pad: [7, 14], radius: 999, fill: on ? C.navy : C.card, stroke: on ? null : C.line }); txt(c, `${m}m`, 'CM', on ? '#FFFFFF' : C.sub); tap(c, () => ctx.act('setLane', m), `${m}m 레인`); });
+    if (locked) {
+      const lk = al(b, 'H', { gap: 10, pad: [12, 14], fill: C.pinkL, radius: 14, align: 'CENTER', fillW: true });
+      txt(lk, '이번 달에 이미 바꿨어요', 'CM', C.coral, { weight: 700 });
+      txt(lk, `${nextMonthLabel()}부터 다시 바꿀 수 있어요`, 'CR', C.ink, { grow: true });
+    }
+    poolSearch(b, ctx);
+    poolMap(b, ctx, 150);
+    txt(b, ctx.poolQuery ? '검색 결과' : ctx.here ? '내 위치에서 가까운 순' : '내 수영장 근처', 'CM', C.sub);
+    poolRows(b, ctx, ctx.nearby.slice(0, ctx.poolQuery ? 20 : 8), { action: 'choosePool', locked });
+    const v = al(b, 'H', { gap: 12, pad: [14, 16], fill: ok ? '#E6F7EC' : G.soft3, radius: 20, align: 'CENTER', fillW: true });
+    art(v, A.seal, 46);
+    const vc = al(v, 'V', { gap: 2, grow: true });
+    txt(vc, ok ? `${cur.name} 인증 완료` : '수영장에서 인증해 주세요', 'BM', C.ink, { fillW: true });
+    txt(vc, ok ? '친구와 함께하기가 열리면 이 수영장 바닷길에 함께해요' : `수영장 ${Math.round(window.Place.VERIFY_KM * 1000)}m 안에서 위치를 확인해요`, 'CR', C.sub, { fillW: true, size: 12 });
+    if (!ok) { const vb = al(v, 'H', { pad: [8, 12], fill: C.btn, radius: 12, cls: 'btn' }); txt(vb, '인증하기', 'CM', '#FFFFFF', { weight: 700 }); tap(vb, () => ctx.act('verify'), '수영장 인증하기'); }
+    const note = al(b, 'V', { gap: 4, pad: [12, 14], fill: '#EEF3F9', radius: 14, fillW: true });
+    ['수영장은 한 달에 한 번 바꿀 수 있어요. 처음 고른 건 횟수에 넣지 않아요.', '현재 위치는 이 폰 안에서 수영장 찾기와 인증에만 쓰고, 저장하거나 보내지 않아요.', '모은 진주와 아이템, MY POOL 꾸미기는 그대로예요.', '다른 수영장에서 헤엄친 날도 진주는 받아요.'].forEach((l) => txt(note, '· ' + l, 'CR', C.sub, { fillW: true, size: 12 }));
+    if (window.Place.sources.length) txt(b, `수영장 정보: ${window.Place.sources.join(' · ')}${window.Place.updated ? ` · ${window.Place.updated} 기준` : ''}`, 'CR', C.mute, { fillW: true, size: 11 });
+    return s;
+  }
 
   // ---------- 01 오늘의 진주 ----------
   // 앱에서 '오늘의 진주' 카드에 보일 내용. ctx.today = { status, summary, pending } (js/main.js)
@@ -624,9 +733,10 @@
     const hl = al(h, 'V', { gap: 2 });
     const lab = al(hl, 'H', { gap: 3, align: 'CENTER' }); txt(lab, '우리 수영장', 'CR', C.sub);
     if (ctx.live) { const g = iconBtn(lab, P.icon.gearS(C.sub), 14, () => ctx.go('pool-set'), '내 수영장 설정'); g.classList.add('hit'); }
-    const nm = al(hl, 'H', { gap: 6, align: 'CENTER' }); txt(nm, POOLS[st.pool][0], 'T', C.ink);
-    if (ctx.live && st.verified[st.pool]) pill(nm, '인증', C.soft, C.primary, 'L', [2, 6]);
-    pill(h, ctx.live ? POOLS[st.pool][1].split(' · ')[1] : `멤버 ${POOLS[st.pool][2]}명`, C.soft, C.primary, 'CM', [6, 10]);
+    const cp = curPool(ctx);
+    const nm = al(hl, 'H', { gap: 6, align: 'CENTER' }); txt(nm, cp.name, 'T', C.ink);
+    if (ctx.live && isVerified(ctx)) pill(nm, '인증', C.soft, C.primary, 'L', [2, 6]);
+    pill(h, ctx.live ? cp.meta : `멤버 ${POOLS[st.pool][2]}명`, C.soft, C.primary, 'CM', [6, 10]);
     if (ctx.live) { poolSolo(ctx, b); tabBar(s, '우리 수영장'); return s; }
     const r = route(st.pool, todayKm(ctx));
     const rc = al(b, 'V', { name: 'sea-route', gap: 10, pad: [18, 18], fill: '#DDF5F2', radius: 24, fillW: true });
@@ -769,7 +879,7 @@
   };
 
   // 수영장 레인 길이(m): 수영장 정보의 '25m 6레인'에서
-  const laneOf = (st) => { const m = /(\d+)m/.exec((POOLS[st.pool] || [])[1] || ''); return m ? +m[1] : 25; };
+  const laneOf = (st) => { if (st.myPool) return st.myPool.lane || 25; const m = /(\d+)m/.exec((POOLS[st.pool] || [])[1] || ''); return m ? +m[1] : 25; };
   const josa = (w, a, b) => { const c = w.charCodeAt(w.length - 1) - 0xAC00; return c >= 0 && c <= 11171 && c % 28 ? a : b; };
   // MY POOL '오늘 풀에 생긴 일': 따라오는 친구 · 닿은 섬 · 다음 섬
   function poolEvents(ctx) {
@@ -831,7 +941,7 @@
     iconBtn(h, P.icon.gear, 24, () => ctx.act('toast', '설정은 곧 열려요'), '설정');
     const pf = al(b, 'H', { gap: 14, pad: [16, 16], fill: C.card, radius: 22, align: 'CENTER', fillW: true });
     const av = al(pf, 'H', { fill: C.sky, radius: 40, w: 80, h: 80, align: 'CENTER', justify: 'CENTER', clip: true }); art(av, me(ctx), 78);
-    const pi = al(pf, 'V', { gap: 3, grow: true }); txt(pi, st.name, 'H', C.ink); txt(pi, ctx.live ? POOLS[st.pool][0] : `${POOLS[st.pool][0]} · 새벽 6시 중급반`, 'CR', C.sub); const ms = ctx.live ? myStats(ctx) : null; pill(pi, ms && ms.km >= PR().GRADUATE_KM ? '킥판 졸업' : '킥판 졸업반', C.pinkL, '#D94FAE');
+    const pi = al(pf, 'V', { gap: 3, grow: true }); txt(pi, st.name, 'H', C.ink); txt(pi, ctx.live ? curPool(ctx).name : `${POOLS[st.pool][0]} · 새벽 6시 중급반`, 'CR', C.sub); const ms = ctx.live ? myStats(ctx) : null; pill(pi, ms && ms.km >= PR().GRADUATE_KM ? '킥판 졸업' : '킥판 졸업반', C.pinkL, '#D94FAE');
     const ed = al(pf, 'H', { pad: [6, 10], radius: 999, stroke: C.line }); txt(ed, '편집', 'CM', C.sub); tap(ed, () => ctx.go('pick'), '캐릭터 편집');
     const stats = al(b, 'H', { pad: [14, 8], fill: C.card, radius: 20, fillW: true });
     [['총 거리', ms ? km1(ms.km) + 'km' : '48.2km'], ['수영한 날', ms ? ms.days + '일' : '36일'], ['내 진주', st.pearls.toLocaleString()]].forEach(([k, v]) => { const c = al(stats, 'V', { gap: 2, align: 'CENTER', grow: true }); txt(c, v, 'H', C.ink); txt(c, k, 'CR', C.sub); });
@@ -843,7 +953,7 @@
     txt(gr, grad ? `${nm}${josa(nm, '이', '가')} 이제 킥판 없이 헤엄쳐요` : `졸업하면 ${nm}${ctx.live ? josa(nm, '이', '가') : '가'} 킥판 없이 헤엄쳐요`, 'CR', C.sub);
     const unread = NOTICES.length - st.read.length;
     const list = al(b, 'V', { fill: C.card, radius: 20, fillW: true, pad: [4, 0] });
-    [['워치 연동', ctx.platform === 'android' ? '갤럭시워치 연결됨' : 'Apple Watch 연결됨', () => (ctx.platform && ctx.platform !== 'web' ? ctx.go('home') : ctx.act('toast', 'Apple Watch에서 오늘 기록을 받아왔어요'))], ['내 수영장', POOLS[st.pool][0], () => ctx.go('pool-set')], ['우리 강습반', ctx.live ? '곧 열려요' : '새벽 6시 중급반', () => ctx.go('pool')], ['보관함', `아이템 ${st.owned.length}개 · 진주 ${st.pearls}`, () => ctx.go('dress')], ['알림 설정', '', () => ctx.act('toast', '알림 설정은 곧 열려요')], ['공지사항', unread > 0 ? `새 글 ${Math.min(2, unread)}` : '', () => ctx.go('notice')]].forEach(([t, v, fn], i) => {
+    [['워치 연동', ctx.platform === 'android' ? '갤럭시워치 연결됨' : 'Apple Watch 연결됨', () => (ctx.platform && ctx.platform !== 'web' ? ctx.go('home') : ctx.act('toast', 'Apple Watch에서 오늘 기록을 받아왔어요'))], ['내 수영장', ctx.live ? curPool(ctx).name : POOLS[st.pool][0], () => ctx.go('pool-set')], ['우리 강습반', ctx.live ? '곧 열려요' : '새벽 6시 중급반', () => ctx.go('pool')], ['보관함', `아이템 ${st.owned.length}개 · 진주 ${st.pearls}`, () => ctx.go('dress')], ['알림 설정', '', () => ctx.act('toast', '알림 설정은 곧 열려요')], ['공지사항', unread > 0 ? `새 글 ${Math.min(2, unread)}` : '', () => ctx.go('notice')]].forEach(([t, v, fn], i) => {
       const r = al(list, 'H', { gap: 8, pad: [14, 16], align: 'CENTER', fillW: true }); divider(r, i);
       txt(r, t, 'BM', C.ink, { grow: true });
       if (v) { if (t === '공지사항') pill(r, v, C.pink, C.ink, 'L', [2, 7]); else txt(r, v, 'CM', t === '워치 연동' ? C.primary : C.sub); }
@@ -931,6 +1041,7 @@
   // ---------- 09 내 수영장 설정 (이사 · 한 달에 한 번 변경) ----------
   S['09'] = (ctx) => {
     const st = ctx.st;
+    if (realPools(ctx)) return poolSetReal(ctx);
     const cur = st.pool;
     const locked = ctx.live && st.poolChanged === monthKey();
     const s = screen('09');

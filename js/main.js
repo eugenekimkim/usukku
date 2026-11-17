@@ -1,6 +1,7 @@
 // 우수꾸 앱: 라우팅 · 상태 저장 · 진주 받기 · 상점 · 시트 · 토스트
 (function () {
-  const U = window.USUKKU, A = window.ART, H = window.Health, PEARLS = window.PEARLS, PG = window.PROGRESS;
+  const U = window.USUKKU, A = window.ART, H = window.Health, PEARLS = window.PEARLS, PG = window.PROGRESS, PL = window.Place;
+  const REAL_POOLS = PL.ready();
   const KEY = 'usukku:v4', OLD_KEY = 'usukku:v3';
   const NATIVE = H.isNative(), PLATFORM = H.platform();
   const ROUTES = { splash: '00-0', intro: '00-0b', pick: '00', 'pool-pick': '00-2', home: '01', dress: '02', pool: '03', mypool: '04-2', 'mypool-side': '04-2', 'pool-set': '09', dex: '05', my: '06', menu: '07', notice: '08' };
@@ -46,8 +47,14 @@
   // 오늘 수영 기록: { status, summary, pending } — 화면은 먼저 그리고, 값이 오면 다시 그려요
   let today = { status: 'loading' };
 
+  // 수영장 찾기: 현재 위치는 메모리에만 두고 저장하지 않아요
+  let here = null, poolQuery = '';
+  const anchor = () => here || (st.myPool && { lat: st.myPool.lat, lng: st.myPool.lng }) || PL.DEMO;
   const ctx = {
     get st() { return st; },
+    get here() { return here; },
+    get poolQuery() { return poolQuery; },
+    get nearby() { return REAL_POOLS ? (poolQuery ? PL.search(poolQuery, anchor(), 20) : PL.nearby(anchor(), 20)) : []; },
     get today() { return today; },
     get ledger() { return ledgerNow(); },
     platform: PLATFORM,
@@ -68,9 +75,10 @@
     const next = view.querySelector('.scroll'); if (next) next.scrollTop = top;
     phone.dataset.route = r;
     document.title = `우수꾸 · ${{ splash: '시작', intro: '시작', pick: '캐릭터 선택', 'pool-pick': '수영장 선택', home: '오늘의 진주', dress: '꾸미기', pool: '우리 수영장', mypool: 'MY POOL', 'mypool-side': 'MY POOL', 'pool-set': '내 수영장 설정', dex: '바다 도감', my: '마이', menu: '전체 메뉴', notice: '공지사항' }[r]}`;
+    if (r === 'pool-pick' && REAL_POOLS && !here && !autoLocated) { autoLocated = true; setTimeout(() => { if (route === 'pool-pick') ACTIONS.locate(); }, 400); }
     if (r === 'splash') { clearTimeout(splashTimer); splashTimer = setTimeout(() => { if (route === 'splash') ctx.go(st.onboarded ? 'home' : 'intro'); }, 1800); }
   }
-  let splashTimer;
+  let splashTimer, autoLocated = false;
   const refresh = () => { save(); render(route, true); };
 
   // ---------- 토스트 · 시트 ----------
@@ -111,6 +119,72 @@
       sh.appendChild(a);
     });
   }
+  // ---------- 실제 수영장 (js/place.js) ----------
+  const toMine = (p) => ({ id: p.id, name: p.name, dong: p.dong, addr: p.addr, lat: p.lat, lng: p.lng, lane: (st.myPool && st.myPool.lane) || 25 });
+  // 위치기반서비스 이용약관 동의: 위치를 처음 쓸 때 한 번 (legal/location.html)
+  function askLocationConsent(next) {
+    sheet((sh) => {
+      sh.appendChild(text('div', 'sh-title', '위치를 써도 될까요?'));
+      sh.appendChild(text('div', 'sh-sub', '가까운 수영장 찾기와 수영장 인증에만 현재 위치를 써요.\n위치는 이 폰 안에서만 쓰고, 저장하거나 밖으로 보내지 않아요.'));
+      const link = text('button', 'sbtn', '위치기반서비스 이용약관 보기'); link.type = 'button'; link.style.flex = 'none'; link.style.width = '100%'; link.style.marginTop = '6px';
+      link.addEventListener('click', () => ACTIONS.legalDoc('위치기반서비스 이용약관', 'legal/location.html', () => askLocationConsent(next)));
+      sh.appendChild(link);
+      const a = el('div', 'sh-actions');
+      a.appendChild(button('나중에', false, closeSheet));
+      a.appendChild(button('동의하고 계속', true, () => { st.locConsent = new Date().toISOString().slice(0, 10); save(); closeSheet(); next(); }));
+      sh.appendChild(a);
+    }, { center: true });
+  }
+  function locationError(e) {
+    const denied = e && e.code === 'denied';
+    sheet((sh) => {
+      sh.appendChild(text('div', 'sh-title', denied ? '위치 권한이 꺼져 있어요' : '현재 위치를 찾지 못했어요'));
+      sh.appendChild(text('div', 'sh-sub', denied
+        ? (PLATFORM === 'ios' ? '설정 > 우수꾸 > 위치에서 "앱을 사용하는 동안"을 골라 주세요.' : PLATFORM === 'android' ? '설정 > 애플리케이션 > 우수꾸 > 권한 > 위치를 허용해 주세요.' : '브라우저 주소창의 위치 권한을 허용해 주세요.') + '\n위치는 이 폰 안에서 수영장 찾기와 인증에만 써요.'
+        : '실내에서는 위치가 잘 안 잡힐 수 있어요. 잠시 뒤에 다시 해 주세요.\n이름으로 검색해서 고를 수도 있어요.'));
+      const a = el('div', 'sh-actions');
+      if (denied && PLATFORM === 'ios') { a.appendChild(button('닫기', false, closeSheet)); a.appendChild(button('설정 열기', true, () => { closeSheet(); H.openSettings().catch(() => {}); })); }
+      else a.appendChild(button('확인', true, closeSheet));
+      sh.appendChild(a);
+    }, { center: true });
+  }
+  function chooseReal(id) {
+    const p = PL.byId(id); if (!p) return;
+    if (!st.myPool) { st.myPool = toMine(p); refresh(); toast(`내 수영장이 ${p.name}으로 정해졌어요`); return; }
+    if (st.myPool.id === id) return;
+    if (st.poolChanged === U.monthKey()) { toast(`이번 달에 이미 바꿨어요 · ${U.nextMonthLabel()}부터 바꿀 수 있어요`); return; }
+    sheet((sh) => {
+      sh.appendChild(text('div', 'sh-title', `${p.dong ? p.dong + ' ' : ''}${p.name}으로 바꿀까요?`));
+      sh.appendChild(text('div', 'sh-sub', `바꾸면 ${U.nextMonthLabel()}까지 다시 바꿀 수 없어요. 나의 바닷길, 진주와 아이템은 그대로예요.`));
+      const a = el('div', 'sh-actions');
+      a.appendChild(button('취소', false, closeSheet));
+      a.appendChild(button('바꾸기', true, () => { st.myPool = toMine(p); st.poolChanged = U.monthKey(); poolQuery = ''; closeSheet(); refresh(); toast(`내 수영장이 ${p.name}으로 바뀌었어요`); }));
+      sh.appendChild(a);
+    }, { center: true });
+  }
+  // 수영장 인증: 지금 위치가 수영장 300m 안인지 이 폰 안에서 확인해요
+  function verifyReal() {
+    const p = st.myPool;
+    sheet((sh) => {
+      sh.classList.add('box-open');
+      sh.appendChild(el('div', 'art verify-art float', A.seal));
+      const t = text('div', 'sh-title', '위치를 확인하는 중…'); sh.appendChild(t);
+      const sub = text('div', 'sh-sub', `${p.name} 근처에 있는지 확인하고 있어요`); sh.appendChild(sub);
+      const a = el('div', 'sh-actions'); sh.appendChild(a);
+      Promise.all([PL.locate(true), new Promise((r) => setTimeout(r, 800))]).then(([pos]) => {
+        here = pos;
+        const km = PL.distKm(pos, p);
+        if (km <= PL.VERIFY_KM) {
+          t.textContent = '인증 완료!'; sub.textContent = `${p.name}에 와 있어요`;
+          a.appendChild(button('좋아요', true, () => { st.verified = Object.assign({}, st.verified, { [p.id]: true }); closeSheet(); refresh(); }));
+        } else {
+          t.textContent = '수영장에서 조금 멀어요'; sub.textContent = `지금 ${p.name}에서 ${PL.fmtKm(km)} 떨어져 있어요.\n수영장 ${Math.round(PL.VERIFY_KM * 1000)}m 안에서 다시 해 주세요.`;
+          a.appendChild(button('닫기', true, () => { closeSheet(); refresh(); }));
+        }
+      }).catch((e) => { closeSheet(); locationError(e); });
+    }, { center: true, sticky: true });
+  }
+
   // 섬 도착 · 보상 아이템 축하: 받은 것은 먼저 상태에 넣고(시트를 닫아도 남게), 차례로 보여줘요
   const ISLAND_ITEM = { 3: 'cap:sun', 4: 'goggle:gold' };
   const itemOf = (key) => { const [cat, id] = key.split(':'); return { cat, id, it: U.ITEMS[cat].find((x) => x.id === id) }; };
@@ -160,7 +234,16 @@
     setFur(c) { st.fur = c; if (!st.nameEdited) st.name = defaultName(); refresh(); },
     setName(v) { st.name = v.trim() || defaultName(); st.nameEdited = !!v.trim(); save(); },
     setPool(i) { st.pool = i; refresh(); },
-    finishOnboarding() { st.onboarded = true; save(); stack.length = 0; ctx.go('home'); toast(`${st.name}, 우수꾸에 온 걸 환영해요!`); },
+    // 실제 수영장 고르기 (온보딩 · 처음 한 번은 횟수에 넣지 않아요)
+    pickPool(id) { const p = PL.byId(id); if (!p) return; st.myPool = toMine(p); refresh(); },
+    poolQuery(q) {
+      poolQuery = q; render(route, true);
+      const inp = document.querySelector('.pool-query'); if (inp) { inp.focus(); inp.setSelectionRange(q.length, q.length); }
+    },
+    setLane(m) { if (!st.myPool) return; st.myPool.lane = m; refresh(); toast(`레인 길이 ${m}m · MY POOL 왕복 수에 반영했어요`); },
+    finishOnboarding() {
+      if (REAL_POOLS && !st.myPool) { const p = PL.nearby(anchor(), 1)[0]; if (!p) { toast('수영장을 골라주세요'); return; } st.myPool = toMine(p); }
+      st.onboarded = true; save(); stack.length = 0; ctx.go('home'); toast(`${st.name}, 우수꾸에 온 걸 환영해요!`); },
     // 워치 기록 받기 · 다시 확인하기: 읽는 동안은 지금의 받기 애니메이션(흔들리는 조개)
     sync() {
       const T = today;
@@ -247,11 +330,22 @@
     },
     // 내 수영장 설정
     locate() {
-      // 아티팩트 안에서는 실제 위치를 쓸 수 없어 데모 위치로 대신해요
+      if (REAL_POOLS) {
+        if (!st.locConsent) { askLocationConsent(() => ACTIONS.locate()); return; }
+        toast('현재 위치를 확인하는 중…');
+        PL.locate().then((pos) => {
+          here = pos; poolQuery = ''; refresh();
+          const n = PL.nearby(here, 1)[0];
+          toast(n ? `가장 가까운 수영장 · ${n.name} ${PL.fmtKm(n.km)}` : '근처에서 수영장을 찾지 못했어요');
+        }).catch((e) => locationError(e));
+        return;
+      }
+      // 수영장 목록이 없을 때(데모): 데모 위치로 대신해요
       toast('현재 위치를 확인하는 중…');
       setTimeout(() => { st.located = true; refresh(); toast('현재 위치 · 성내동 근처'); }, 700);
     },
     choosePool(i) {
+      if (REAL_POOLS && typeof i === 'string') { chooseReal(i); return; }
       if (st.pool === i) return;
       if (st.poolChanged === U.monthKey()) { toast(`이번 달에 이미 바꿨어요 · ${U.nextMonthLabel()}부터 바꿀 수 있어요`); return; }
       const [name, , , dong] = U.POOLS[i];
@@ -265,6 +359,7 @@
       }, { center: true });
     },
     verify() {
+      if (REAL_POOLS && st.myPool) { if (!st.locConsent) { askLocationConsent(verifyReal); return; } verifyReal(); return; }
       const i = st.pool;
       sheet((sh) => {
         sh.classList.add('box-open');
@@ -295,19 +390,23 @@
     openNotice(i) { st.openNotice = st.openNotice === i ? -1 : i; if (!st.read.includes(i)) st.read.push(i); refresh(); },
     about() { location.href = 'about/index.html'; },
     // 이용약관 · 개인정보 처리방침: 앱 안에서 바로 보기 (legal/)
-    legal() {
-      const show = (title, src) => sheet((sh) => {
+    legalDoc(title, src, onClose) {
+      sheet((sh) => {
         sh.classList.add('legal-sheet');
         sh.appendChild(text('div', 'sh-title', title));
         const f = document.createElement('iframe'); f.src = src; f.title = title; f.className = 'legal-frame'; sh.appendChild(f);
-        const a = el('div', 'sh-actions'); a.appendChild(button('닫기', true, closeSheet)); sh.appendChild(a);
+        const a = el('div', 'sh-actions'); a.appendChild(button('닫기', true, () => { closeSheet(); if (onClose) onClose(); })); sh.appendChild(a);
       });
+    },
+    legal() {
+      const show = (title, src) => ACTIONS.legalDoc(title, src);
       sheet((sh) => {
         sh.appendChild(text('div', 'sh-title', '이용약관 · 개인정보'));
         sh.appendChild(text('div', 'sh-sub', '주식회사 프로젝트서티즈 · 시행일 2026.11.17'));
         const a = el('div', 'sh-actions'); a.style.flexDirection = 'column';
         a.appendChild(button('이용약관', false, () => show('이용약관', 'legal/terms.html')));
         a.appendChild(button('개인정보 처리방침', false, () => show('개인정보 처리방침', 'legal/privacy.html')));
+        a.appendChild(button('위치기반서비스 이용약관', false, () => show('위치기반서비스 이용약관', 'legal/location.html')));
         a.appendChild(button('닫기', true, closeSheet));
         sh.appendChild(a);
       });
