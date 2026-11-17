@@ -294,6 +294,24 @@
     noticeFilter(c, silent) { st.noticeFilter = c; st.openNotice = -1; if (silent) save(); else refresh(); },
     openNotice(i) { st.openNotice = st.openNotice === i ? -1 : i; if (!st.read.includes(i)) st.read.push(i); refresh(); },
     about() { location.href = 'about/index.html'; },
+    // 이용약관 · 개인정보 처리방침: 앱 안에서 바로 보기 (legal/)
+    legal() {
+      const show = (title, src) => sheet((sh) => {
+        sh.classList.add('legal-sheet');
+        sh.appendChild(text('div', 'sh-title', title));
+        const f = document.createElement('iframe'); f.src = src; f.title = title; f.className = 'legal-frame'; sh.appendChild(f);
+        const a = el('div', 'sh-actions'); a.appendChild(button('닫기', true, closeSheet)); sh.appendChild(a);
+      });
+      sheet((sh) => {
+        sh.appendChild(text('div', 'sh-title', '이용약관 · 개인정보'));
+        sh.appendChild(text('div', 'sh-sub', '주식회사 프로젝트서티즈 · 시행일 2026.11.17'));
+        const a = el('div', 'sh-actions'); a.style.flexDirection = 'column';
+        a.appendChild(button('이용약관', false, () => show('이용약관', 'legal/terms.html')));
+        a.appendChild(button('개인정보 처리방침', false, () => show('개인정보 처리방침', 'legal/privacy.html')));
+        a.appendChild(button('닫기', true, closeSheet));
+        sh.appendChild(a);
+      });
+    },
     reset() {
       sheet((sh) => {
         sh.appendChild(text('div', 'sh-title', '처음부터 다시 할까요?'));

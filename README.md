@@ -39,7 +39,7 @@
 | `js/progress.js` | 혼자 모드 진행: 날짜별 기록, 나의 바닷길(섬 5 · 15 · 30 · 50 · 75km), 주간 연속, 이번 달 목표, 보상 조건 |
 | `capacitor.config.json` · `package.json` · `scripts/build-web.mjs` | Capacitor 설정, 웹 파일을 `www/`로 복사 |
 | `ios/` · `android/` | Capacitor 네이티브 프로젝트 (`ios/App/App/UsukkuHealthPlugin.swift`: 수영 거리용 작은 HealthKit 플러그인) |
-| `native/privacypolicy.html` | Health Connect 권한 화면에서 여는 건강 데이터 이용 안내(초안) |
+| `legal/` | 이용약관 · 개인정보 처리방침 (주식회사 프로젝트서티즈, 시행 2026.11.17). 앱 전체 메뉴와 Health Connect 권한 화면에서 열려요 |
 | `tests/` | 진주 규칙 · 기록 읽기 테스트 (`npm test`) |
 | `js/art.js` | 동물 친구 · 바다 친구 · 물개 코치 SVG 생성기 |
 | `js/props.js` | 아이콘, 소품, 수영장 장면 SVG |

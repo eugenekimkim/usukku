@@ -891,7 +891,7 @@
     const soon = (t) => () => ctx.act('toast', t);
     group('소식', [['공지사항', ctx.live ? (unread > 0 ? 'N' : '') : 'N', () => { ctx.act('noticeFilter', '전체', true); ctx.go('notice'); }], ['이벤트', '', () => { ctx.act('noticeFilter', '이벤트', true); ctx.go('notice'); }]]);
     group('함께', [['친구 초대하기', '', soon('초대 링크를 복사했다고 가정할게요 · 데모')], ['강습반 팀 만들기', '', soon('강습반 팀 만들기는 곧 열려요')]]);
-    const help = [['설정', '', soon('설정은 곧 열려요')], ['고객센터', '', soon('고객센터는 곧 열려요')], ['이용약관 · 개인정보', '', soon('이용약관은 곧 열려요')]];
+    const help = [['설정', '', soon('설정은 곧 열려요')], ['고객센터', '', soon('고객센터는 곧 열려요')], ['이용약관 · 개인정보', '', ctx.live ? () => ctx.act('legal') : soon('이용약관은 곧 열려요')]];
     if (ctx.live && (!ctx.platform || ctx.platform === 'web')) help.push(['디자인 시안 보기', '', () => ctx.act('about')]);
     if (ctx.live) help.push(['데모 처음부터 다시', '', () => ctx.act('reset')]);
     group('도움', help);
