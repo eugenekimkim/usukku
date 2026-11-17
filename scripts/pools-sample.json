@@ -1,0 +1,47 @@
+{
+  "osm": [
+    {
+      "type": "node",
+      "id": 368859501,
+      "lat": 37.490184,
+      "lon": 129.108874,
+      "tags": {
+        "leisure": "swimming_pool",
+        "name": "그린옥사우나",
+        "name:en": "Green Ok Sauna",
+        "name:ko": "그린옥사우나",
+        "name:ko-Latn": "Geurinoksauna",
+        "sport": "swimming"
+      }
+    },
+    {
+      "type": "node",
+      "id": 368866873,
+      "lat": 37.520554,
+      "lon": 126.872355,
+      "tags": {
+        "leisure": "sports_centre",
+        "name": "미진수영장",
+        "name:en": "Mijin Swimming Pool",
+        "name:ko": "미진수영장",
+        "name:ko-Latn": "Mijinsuyeongjang",
+        "sport": "swimming"
+      }
+    },
+    {
+      "type": "node",
+      "id": 368866881,
+      "lat": 37.5562833,
+      "lon": 127.0017918,
+      "tags": {
+        "leisure": "sports_centre",
+        "name": "장충수영장",
+        "name:en": "Jangchung Swimming Pool",
+        "name:ko": "장충수영장",
+        "name:ko-Latn": "Jangchungsuyeongjang",
+        "sport": "swimming"
+      }
+    }
+  ],
+  "go": []
+}
