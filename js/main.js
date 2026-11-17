@@ -1,6 +1,6 @@
 // 우수꾸 앱: 라우팅 · 상태 저장 · 진주 받기 · 상점 · 시트 · 토스트
 (function () {
-  const U = window.USUKKU, A = window.ART, H = window.Health, PEARLS = window.PEARLS;
+  const U = window.USUKKU, A = window.ART, H = window.Health, PEARLS = window.PEARLS, PG = window.PROGRESS;
   const KEY = 'usukku:v4', OLD_KEY = 'usukku:v3';
   const NATIVE = H.isNative(), PLATFORM = H.platform();
   const ROUTES = { splash: '00-0', intro: '00-0b', pick: '00', 'pool-pick': '00-2', home: '01', dress: '02', pool: '03', mypool: '04-2', 'mypool-side': '04-2', 'pool-set': '09', dex: '05', my: '06', menu: '07', notice: '08' };
@@ -13,6 +13,8 @@
     if (synced && !NATIVE) { const l = PEARLS.ledgerFor(null); rest.pearlDay = PEARLS.apply(l, PEARLS.pending(H._.demoSwims(), l)); }
     return rest;
   }
+  // 앱은 진주 0개에서, 브라우저는 데모 상태에서 시작해요
+  const fresh = () => (NATIVE ? Object.assign(clone(U.DEFAULT_STATE), clone(U.FRESH_STATE)) : clone(U.DEFAULT_STATE));
   function load() {
     try {
       let raw = localStorage.getItem(KEY);
@@ -20,12 +22,19 @@
         const old = localStorage.getItem(OLD_KEY);
         if (old) { raw = JSON.stringify(migrate(JSON.parse(old))); localStorage.setItem(KEY, raw); localStorage.removeItem(OLD_KEY); }
       }
-      if (raw) { const o = JSON.parse(raw); return Object.assign(clone(U.DEFAULT_STATE), o, { health: Object.assign({ asked: false }, o.health) }); }
+      if (raw) { const o = JSON.parse(raw); return Object.assign(fresh(), o, { health: Object.assign({ asked: false }, o.health) }); }
     } catch (e) { /* 저장소를 못 쓰면 기본값 */ }
-    return clone(U.DEFAULT_STATE);
+    return fresh();
+  }
+  // 날짜별 기록이 없으면: 브라우저는 데모 기록(지난 3주 월 · 수 · 금), 앱은 빈 기록
+  function ensureHistory() {
+    if (st.history) return;
+    st.history = NATIVE ? {} : PG.demoHistory();
+    st.islands = PG.reached(PG.totalKm(st.history));
   }
   function save() { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) { /* 무시 */ } }
   let st = load();
+  ensureHistory();
 
   const phone = document.getElementById('phone');
   const view = document.getElementById('view');
@@ -102,6 +111,48 @@
       sh.appendChild(a);
     });
   }
+  // 섬 도착 · 보상 아이템 축하: 받은 것은 먼저 상태에 넣고(시트를 닫아도 남게), 차례로 보여줘요
+  const ISLAND_ITEM = { 3: 'cap:sun', 4: 'goggle:gold' };
+  const itemOf = (key) => { const [cat, id] = key.split(':'); return { cat, id, it: U.ITEMS[cat].find((x) => x.id === id) }; };
+  function celebrate(list, thenRewards) {
+    const next = list.shift();
+    if (!next) {
+      if (!thenRewards) return;
+      const items = PG.earnedRewards(st.history).filter((k) => !st.owned.includes(k));
+      if (items.length) celebrate(items.map((k) => ({ item: k })), false);
+      return;
+    }
+    const go = () => { closeSheet(); refresh(); celebrate(list, thenRewards); };
+    if (next.island != null) {
+      const i = next.island, name = U.ISLANDS[i];
+      const friends = Object.keys(U.SEA).filter((k) => U.SEA[k][2] === name);
+      const reward = ISLAND_ITEM[i] && !st.owned.includes(ISLAND_ITEM[i]) ? itemOf(ISLAND_ITEM[i]) : null;
+      st.islands.push(i); st.pearls += PG.ISLAND_PEARLS;
+      friends.forEach((k) => { if (!st.friends.includes(k)) st.friends.push(k); if (st.follow.length < 3 && !st.follow.includes(k)) st.follow.push(k); });
+      if (reward) st.owned.push(ISLAND_ITEM[i]);
+      save();
+      sheet((sh) => {
+        sh.classList.add('box-open');
+        sh.appendChild(el('div', 'art dex-art float', A.sea(friends[0])));
+        sh.appendChild(text('div', 'sh-title', `${name}에 도착했어요!`));
+        sh.appendChild(text('div', 'sh-sub', `진주 ${PG.ISLAND_PEARLS}개 · 바다 친구 ${friends.map((k) => U.SEA[k][0]).join(', ')}` + (reward ? ` · ${reward.it.name}` : '')));
+        const a = el('div', 'sh-actions'); a.appendChild(button('좋아요', true, go)); sh.appendChild(a);
+      }, { center: true, sticky: true });
+      return;
+    }
+    const { cat, id, it } = itemOf(next.item);
+    st.owned.push(next.item); save();
+    sheet((sh) => {
+      sh.classList.add('box-open');
+      sh.appendChild(el('div', 'art dex-art pop', it.svg));
+      sh.appendChild(text('div', 'sh-title', `${it.name}을(를) 얻었어요!`));
+      sh.appendChild(text('div', 'sh-sub', `${PG.REWARDS[next.item].label} 보상이에요`));
+      const a = el('div', 'sh-actions');
+      a.appendChild(button('나중에', false, go));
+      a.appendChild(button('착용하기', true, () => { st.equip[cat] = id; go(); toast(`${it.name} 착용!`); }));
+      sh.appendChild(a);
+    }, { center: true, sticky: true });
+  }
   const defaultName = () => `새벽반 ${U.furName(st.fur)}${U.animalName(st.kind)}`;
   const ACTIONS = {
     toast,
@@ -141,11 +192,16 @@
             sub.textContent = '하루 최대 5km까지 진주를 받아요 · 내일 또 만나요';
           }
           actions.appendChild(button('좋아요', true, () => {
+            const before = PG.totalKm(st.history);
             st.pearls += p.total;
             st.pearlDay = PEARLS.apply(ledgerNow(), p);
+            // 날짜별 기록: 진주를 받은 거리(하루 5km까지) · 시간 · 횟수
+            st.history = PG.addDay(st.history, st.pearlDay.day, { m: p.meters, min: Math.round(p.swims.reduce((t, x) => t + x.minutes, 0)), n: p.swims.length });
             today = Object.assign({}, R, { pending: PEARLS.pending(R.summary.swims, st.pearlDay) });
             closeSheet(); refresh();
-            toast(p.meters > 0 ? `내 진주 ${st.pearls}개 · 우리 수영장 바닷길에 ${(p.meters / 1000).toFixed(2)}km를 보탰어요` : `내 진주 ${st.pearls}개`);
+            toast(p.meters > 0 ? `내 진주 ${st.pearls}개 · 나의 바닷길에 ${(p.meters / 1000).toFixed(2)}km를 보탰어요` : `내 진주 ${st.pearls}개`);
+            const islands = PG.reached(PG.totalKm(st.history)).filter((i) => !st.islands.includes(i));
+            if (islands.length || PG.totalKm(st.history) !== before) setTimeout(() => celebrate(islands.map((i) => ({ island: i })), true), 900);
           }));
         });
       }, { center: true, sticky: true });
@@ -157,7 +213,7 @@
     equip(cat, id) {
       const it = U.ITEMS[cat].find((x) => x.id === id);
       if (!st.owned.includes(cat + ':' + id)) {
-        if (it.reward) { toast(`${it.name}은(는) ${it.reward} 보상이에요`); return; }
+        if (it.reward) { const rw = PG.REWARDS[cat + ':' + id]; toast(`${it.name}은(는) ${rw ? rw.label : it.reward} 보상이에요`); return; }
         buy(cat, it); return;
       }
       // 오리발은 한 번 더 누르면 벗기
@@ -225,7 +281,7 @@
     dexFilter(c) { st.dexFilter = c; refresh(); },
     dexDetail(k) {
       const found = st.friends.includes(k);
-      const [name, cat] = U.SEA[k]; const how = U.seaHow(k);
+      const [name, cat, isl] = U.SEA[k]; const how = `나의 바닷길이 ${isl}에 닿으면 만나요`;
       sheet((sh) => {
         sh.appendChild(el('div', 'art dex-art' + (found ? '' : ' unknown'), found ? A.sea(k) : A.seaSilhouette(k)));
         sh.appendChild(text('div', 'sh-title', found ? name : '아직 못 만난 친구'));
@@ -238,13 +294,31 @@
     noticeFilter(c, silent) { st.noticeFilter = c; st.openNotice = -1; if (silent) save(); else refresh(); },
     openNotice(i) { st.openNotice = st.openNotice === i ? -1 : i; if (!st.read.includes(i)) st.read.push(i); refresh(); },
     about() { location.href = 'about/index.html'; },
+    // 이용약관 · 개인정보 처리방침: 앱 안에서 바로 보기 (legal/)
+    legal() {
+      const show = (title, src) => sheet((sh) => {
+        sh.classList.add('legal-sheet');
+        sh.appendChild(text('div', 'sh-title', title));
+        const f = document.createElement('iframe'); f.src = src; f.title = title; f.className = 'legal-frame'; sh.appendChild(f);
+        const a = el('div', 'sh-actions'); a.appendChild(button('닫기', true, closeSheet)); sh.appendChild(a);
+      });
+      sheet((sh) => {
+        sh.appendChild(text('div', 'sh-title', '이용약관 · 개인정보'));
+        sh.appendChild(text('div', 'sh-sub', '주식회사 프로젝트서티즈 · 시행일 2026.11.17'));
+        const a = el('div', 'sh-actions'); a.style.flexDirection = 'column';
+        a.appendChild(button('이용약관', false, () => show('이용약관', 'legal/terms.html')));
+        a.appendChild(button('개인정보 처리방침', false, () => show('개인정보 처리방침', 'legal/privacy.html')));
+        a.appendChild(button('닫기', true, closeSheet));
+        sh.appendChild(a);
+      });
+    },
     reset() {
       sheet((sh) => {
         sh.appendChild(text('div', 'sh-title', '처음부터 다시 할까요?'));
         sh.appendChild(text('div', 'sh-sub', '고른 캐릭터와 꾸민 아이템이 모두 초기화돼요. (데모용)'));
         const a = el('div', 'sh-actions');
         a.appendChild(button('취소', false, closeSheet));
-        a.appendChild(button('다시 하기', true, () => { st = clone(U.DEFAULT_STATE); try { localStorage.removeItem(KEY); } catch (e) { /* 무시 */ } closeSheet(); stack.length = 0; today = { status: 'loading' }; refreshToday(false); setHash('splash'); }));
+        a.appendChild(button('다시 하기', true, () => { st = fresh(); ensureHistory(); try { localStorage.removeItem(KEY); } catch (e) { /* 무시 */ } closeSheet(); stack.length = 0; today = { status: 'loading' }; refreshToday(false); setHash('splash'); }));
         sh.appendChild(a);
       }, { center: true });
     },

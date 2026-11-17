@@ -4,4 +4,6 @@
     <string name="title_activity_main">우수꾸</string>
     <string name="package_name">kr.co.itso.usukku</string>
     <string name="custom_url_scheme">kr.co.itso.usukku</string>
+    <!-- Health Connect 권한 화면의 '개인정보 처리방침' (@capgo/capacitor-health PermissionsRationaleActivity) -->
+    <string name="health_connect_privacy_policy_url">file:///android_asset/public/legal/privacy.html</string>
 </resources>
