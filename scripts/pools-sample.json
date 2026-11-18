@@ -43,5 +43,75 @@
       }
     }
   ],
-  "go": []
+  "go": [
+    {
+      "keys": [
+        "BDST_BICOU",
+        "BDST_TFA",
+        "BPLC_NM",
+        "CLSBIZ_YMD",
+        "CORP_NM",
+        "CRD_INFO_X",
+        "CRD_INFO_Y",
+        "CULTR_SPTS_TPBIZ_NM",
+        "DAT_UPDT_PNT",
+        "DAT_UPDT_SE",
+        "DTL_SALS_STTS_CD",
+        "DTL_SALS_STTS_NM",
+        "INSRNC_JOIN_YN_CD",
+        "LAST_MDFCN_PNT",
+        "LCPMT_RTRCN_YMD",
+        "LCPMT_YMD",
+        "LCTN_ZIP",
+        "LDER_CNT",
+        "LOTNO_ADDR",
+        "MBR_RCRT_TOTAL_PERNE",
+        "MNG_NO",
+        "OPN_ATMY_GRP_CD",
+        "PBP_SE_NM",
+        "ROAD_NM_ADDR",
+        "ROAD_NM_ZIP",
+        "SALS_STTS_CD",
+        "SALS_STTS_NM",
+        "TCBIZ_BGNG_YMD",
+        "TCBIZ_END_YMD",
+        "TELNO"
+      ],
+      "first": {
+        "BDST_BICOU": null,
+        "BDST_TFA": null,
+        "BPLC_NM": "주식회사 엔젤크루인천",
+        "CLSBIZ_YMD": "",
+        "CORP_NM": "",
+        "CRD_INFO_X": "",
+        "CRD_INFO_Y": "",
+        "CULTR_SPTS_TPBIZ_NM": "수영장업",
+        "DAT_UPDT_PNT": "2026-11-06 22:54:39",
+        "DAT_UPDT_SE": "I",
+        "DTL_SALS_STTS_CD": "13",
+        "DTL_SALS_STTS_NM": "영업중",
+        "INSRNC_JOIN_YN_CD": "",
+        "LAST_MDFCN_PNT": "2026-11-05 09:35:59",
+        "LCPMT_RTRCN_YMD": "",
+        "LCPMT_YMD": "2026-11-05",
+        "LCTN_ZIP": "",
+        "LDER_CNT": "1",
+        "LOTNO_ADDR": "인천광역시 제물포구 도원동 7-1 인천전용축구경기장",
+        "MBR_RCRT_TOTAL_PERNE": null,
+        "MNG_NO": "CDFH3301012026000001",
+        "OPN_ATMY_GRP_CD": "3501000",
+        "PBP_SE_NM": "사립",
+        "ROAD_NM_ADDR": "인천광역시 제물포구 참외전로 246, 인천전용축구경기장 가동 J20,21,K22호 (도원동)",
+        "ROAD_NM_ZIP": "22328",
+        "SALS_STTS_CD": "01",
+        "SALS_STTS_NM": "영업/정상",
+        "TCBIZ_BGNG_YMD": "",
+        "TCBIZ_END_YMD": "",
+        "TELNO": ""
+      },
+      "top": [
+        "response"
+      ]
+    }
+  ]
 }
