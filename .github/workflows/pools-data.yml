@@ -1,6 +1,6 @@
 # 전국 수영장 목록(js/pools-data.js)을 다시 만들어 이 브랜치에 커밋해요.
 # 매달 1일 main에서 자동, 또는 Actions 탭에서 직접 실행, 또는 만드는 스크립트를 고쳐 푸시했을 때.
-# 공공데이터포털 수영장업까지 넣으려면 저장소 Settings > Secrets에 DATA_GO_KR_KEY를 넣어 주세요.
+# 공공데이터포털 수영장업은 저장소 Settings > Secrets의 DATA_GO_KR_KEY(일반 인증키 Decoding)로 받아요 (2026-11-18 등록).
 name: 수영장 목록
 
 on:
