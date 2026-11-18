@@ -1,10 +1,10 @@
 // 우수꾸 앱: 라우팅 · 상태 저장 · 진주 받기 · 상점 · 시트 · 토스트
 (function () {
-  const U = window.USUKKU, A = window.ART, H = window.Health, PEARLS = window.PEARLS, PG = window.PROGRESS, PL = window.Place;
+  const U = window.USUKKU, A = window.ART, H = window.Health, PEARLS = window.PEARLS, PG = window.PROGRESS, PL = window.Place, NT = window.Notify;
   const REAL_POOLS = PL.ready();
   const KEY = 'usukku:v4', OLD_KEY = 'usukku:v3';
   const NATIVE = H.isNative(), PLATFORM = H.platform();
-  const ROUTES = { splash: '00-0', intro: '00-0b', pick: '00', 'pool-pick': '00-2', home: '01', dress: '02', pool: '03', mypool: '04-2', 'mypool-side': '04-2', 'pool-set': '09', dex: '05', my: '06', menu: '07', notice: '08' };
+  const ROUTES = { splash: '00-0', intro: '00-0b', pick: '00', 'pool-pick': '00-2', home: '01', dress: '02', pool: '03', mypool: '04-2', 'mypool-side': '04-2', 'pool-set': '09', dex: '05', my: '06', menu: '07', notice: '08', records: '10', alarm: '11' };
   const MAIN = ['home', 'dress', 'pool', 'dex'];
 
   const clone = (o) => JSON.parse(JSON.stringify(o));
@@ -74,7 +74,7 @@
     view.replaceChildren(s);
     const next = view.querySelector('.scroll'); if (next) next.scrollTop = top;
     phone.dataset.route = r;
-    document.title = `우수꾸 · ${{ splash: '시작', intro: '시작', pick: '캐릭터 선택', 'pool-pick': '수영장 선택', home: '오늘의 진주', dress: '꾸미기', pool: '우리 수영장', mypool: 'MY POOL', 'mypool-side': 'MY POOL', 'pool-set': '내 수영장 설정', dex: '바다 도감', my: '마이', menu: '전체 메뉴', notice: '공지사항' }[r]}`;
+    document.title = `우수꾸 · ${{ splash: '시작', intro: '시작', pick: '캐릭터 선택', 'pool-pick': '수영장 선택', home: '오늘의 진주', dress: '꾸미기', pool: '우리 수영장', mypool: 'MY POOL', 'mypool-side': 'MY POOL', 'pool-set': '내 수영장 설정', dex: '바다 도감', my: '마이', menu: '전체 메뉴', notice: '공지사항', records: '수영 기록', alarm: '알림 설정' }[r]}`;
     if (r === 'pool-pick' && REAL_POOLS && !here && !autoLocated) { autoLocated = true; setTimeout(() => { if (route === 'pool-pick') ACTIONS.locate(); }, 400); }
     if (r === 'splash') { clearTimeout(splashTimer); splashTimer = setTimeout(() => { if (route === 'splash') ctx.go(st.onboarded ? 'home' : 'intro'); }, 1800); }
   }
@@ -240,6 +240,31 @@
       poolQuery = q; render(route, true);
       const inp = document.querySelector('.pool-query'); if (inp) { inp.focus(); inp.setSelectionRange(q.length, q.length); }
     },
+    // 알림 설정: 바꿀 때마다 폰 알림을 다시 예약해요. 켤 때만 권한을 물어봐요.
+    setAlarm(patch) {
+      const prev = Object.assign({}, NT.DEFAULT, st.alarm || {});
+      const next = Object.assign({}, prev, patch);
+      next.days = [...new Set(next.days)].sort();
+      if (next.on && !next.days.length) { toast('요일을 하나 이상 골라주세요'); return; }
+      st.alarm = next; refresh();
+      NT.apply(next).then((r) => {
+        save();
+        if (!next.on) { if (prev.on) toast('알림을 껐어요'); return; }
+        const days = [1, 2, 3, 4, 5, 6, 0].filter((d) => next.days.includes(d)).map((d) => '일월화수목금토'[d]).join(' · ');
+        toast(r.native ? `${days} ${next.time}에 알려줄게요` : `${days} ${next.time} · 알림은 앱에서 와요`);
+      }).catch((e) => {
+        st.alarm = Object.assign({}, next, { on: false }); refresh();
+        if (e && e.code === 'denied') sheet((sh) => {
+          sh.appendChild(text('div', 'sh-title', '알림 권한이 꺼져 있어요'));
+          sh.appendChild(text('div', 'sh-sub', PLATFORM === 'ios' ? '설정 > 우수꾸 > 알림에서 알림 허용을 켜 주세요.' : '설정 > 애플리케이션 > 우수꾸 > 알림을 켜 주세요.'));
+          const a = el('div', 'sh-actions');
+          if (PLATFORM === 'ios') { a.appendChild(button('닫기', false, closeSheet)); a.appendChild(button('설정 열기', true, () => { closeSheet(); H.openSettings().catch(() => {}); })); }
+          else a.appendChild(button('확인', true, closeSheet));
+          sh.appendChild(a);
+        }, { center: true });
+        else toast('알림을 예약하지 못했어요');
+      });
+    },
     setLane(m) { if (!st.myPool) return; st.myPool.lane = m; refresh(); toast(`레인 길이 ${m}m · MY POOL 왕복 수에 반영했어요`); },
     finishOnboarding() {
       if (REAL_POOLS && !st.myPool) { const p = PL.nearby(anchor(), 1)[0]; if (!p) { toast('수영장을 골라주세요'); return; } st.myPool = toMine(p); }
@@ -281,6 +306,7 @@
             // 날짜별 기록: 진주를 받은 거리(하루 5km까지) · 시간 · 횟수
             st.history = PG.addDay(st.history, st.pearlDay.day, { m: p.meters, min: Math.round(p.swims.reduce((t, x) => t + x.minutes, 0)), n: p.swims.length });
             today = Object.assign({}, R, { pending: PEARLS.pending(R.summary.swims, st.pearlDay) });
+            NT.skipTonight(st.alarm).catch(() => {});
             closeSheet(); refresh();
             toast(p.meters > 0 ? `내 진주 ${st.pearls}개 · 나의 바닷길에 ${(p.meters / 1000).toFixed(2)}km를 보탰어요` : `내 진주 ${st.pearls}개`);
             const islands = PG.reached(PG.totalKm(st.history)).filter((i) => !st.islands.includes(i));

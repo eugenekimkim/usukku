@@ -103,6 +103,7 @@
     history: null, // 날짜별 기록 { 'YYYY-MM-DD': { m, min, n } } (js/progress.js) · null이면 브라우저 데모 기록을 채워요
     islands: [], // 도착 보상을 받은 섬 번호
     locConsent: null, // 위치기반서비스 이용약관 동의 날짜
+    alarm: null, // 알림 설정 { on, days, time, evening } (js/notify.js)
     myPool: null, // 앱에서 고른 실제 수영장 { id, name, dong, addr, lat, lng, lane } (js/place.js)
   };
   // 앱(iOS · Android) 첫 상태: 진주 0개, 기본 아이템, 바다 친구 없음
@@ -954,7 +955,7 @@
     txt(gr, grad ? `${nm}${josa(nm, '이', '가')} 이제 킥판 없이 헤엄쳐요` : `졸업하면 ${nm}${ctx.live ? josa(nm, '이', '가') : '가'} 킥판 없이 헤엄쳐요`, 'CR', C.sub);
     const unread = NOTICES.length - st.read.length;
     const list = al(b, 'V', { fill: C.card, radius: 20, fillW: true, pad: [4, 0] });
-    [['워치 연동', ctx.platform === 'android' ? '갤럭시워치 연결됨' : 'Apple Watch 연결됨', () => (ctx.platform && ctx.platform !== 'web' ? ctx.go('home') : ctx.act('toast', 'Apple Watch에서 오늘 기록을 받아왔어요'))], ['내 수영장', ctx.live ? curPool(ctx).name : POOLS[st.pool][0], () => ctx.go('pool-set')], ['우리 강습반', ctx.live ? '곧 열려요' : '새벽 6시 중급반', () => ctx.go('pool')], ['보관함', `아이템 ${st.owned.length}개 · 진주 ${st.pearls}`, () => ctx.go('dress')], ['알림 설정', '', () => ctx.act('toast', '알림 설정은 곧 열려요')], ['공지사항', unread > 0 ? `새 글 ${Math.min(2, unread)}` : '', () => ctx.go('notice')]].forEach(([t, v, fn], i) => {
+    [['워치 연동', ctx.platform === 'android' ? '갤럭시워치 연결됨' : 'Apple Watch 연결됨', () => (ctx.platform && ctx.platform !== 'web' ? ctx.go('home') : ctx.act('toast', 'Apple Watch에서 오늘 기록을 받아왔어요'))], ['내 수영장', ctx.live ? curPool(ctx).name : POOLS[st.pool][0], () => ctx.go('pool-set')], ['우리 강습반', ctx.live ? '곧 열려요' : '새벽 6시 중급반', () => ctx.go('pool')], ['보관함', `아이템 ${st.owned.length}개 · 진주 ${st.pearls}`, () => ctx.go('dress')], ['알림 설정', ctx.live && ctx.st.alarm && ctx.st.alarm.on ? '켜짐' : '', () => (ctx.live ? ctx.go('alarm') : ctx.act('toast', '알림 설정은 곧 열려요'))], ['공지사항', unread > 0 ? `새 글 ${Math.min(2, unread)}` : '', () => ctx.go('notice')]].forEach(([t, v, fn], i) => {
       const r = al(list, 'H', { gap: 8, pad: [14, 16], align: 'CENTER', fillW: true }); divider(r, i);
       txt(r, t, 'BM', C.ink, { grow: true });
       if (v) { if (t === '공지사항') pill(r, v, C.pink, C.ink, 'L', [2, 7]); else txt(r, v, 'CM', t === '워치 연동' ? C.primary : C.sub); }
@@ -986,7 +987,7 @@
         const t = al(row, 'V', { gap: 8, pad: [16, 6], fill: C.card, radius: 18, align: 'CENTER', grow: true });
         const bx = al(t, 'H', { fill: '#EEF5FF', radius: 14, w: 44, h: 44, align: 'CENTER', justify: 'CENTER' }); art(bx, svg, 26);
         txt(t, l, 'CM', C.ink);
-        tap(t, () => (route ? ctx.go(route) : ctx.act('toast', '수영 기록 통계는 곧 열려요')), l);
+        tap(t, () => (route ? ctx.go(route) : ctx.live ? ctx.go('records') : ctx.act('toast', '수영 기록 통계는 곧 열려요')), l);
       }
     }
     const unread = NOTICES.length - st.read.length;
@@ -1090,6 +1091,91 @@
     if (!ok) { const vb = al(v, 'H', { pad: [8, 12], fill: C.btn, radius: 12, cls: 'btn' }); txt(vb, '인증하기', 'CM', '#FFFFFF', { weight: 700 }); tap(vb, () => ctx.act('verify'), '수영장 인증하기'); }
     const note = al(b, 'V', { gap: 4, pad: [12, 14], fill: '#EEF3F9', radius: 14, fillW: true });
     ['수영장은 한 달에 한 번 바꿀 수 있어요. 처음 고른 건 횟수에 넣지 않아요.', '이미 헤엄친 거리는 이전 수영장 바닷길에 그대로 남아요.', '모은 진주와 아이템, MY POOL 꾸미기는 그대로예요.', '다른 수영장에서 헤엄친 날도 진주는 받아요.'].forEach((l) => txt(note, '· ' + l, 'CR', C.sub, { fillW: true, size: 12 }));
+    return s;
+  };
+
+  // ---------- 10 수영 기록 (앱 전용) ----------
+  S['10'] = (ctx) => {
+    const st = ctx.st, h = st.history || {};
+    const s = screen('10');
+    const b = content(s, [6, 20, 34, 20], 14);
+    const hd = al(b, 'H', { gap: 8, align: 'CENTER', fillW: true }); iconBtn(hd, P.icon.back, 24, () => ctx.back(), '뒤로'); txt(hd, '수영 기록', 'T', C.ink);
+    const S2 = PR().stats(h), list = PR().dayList(h), weeks = PR().weeklySeries(h);
+    // 요약
+    const sum = al(b, 'H', { pad: [14, 8], fill: C.card, radius: 20, fillW: true });
+    [[`${new Date().getMonth() + 1}월 거리`, km1(S2.month.m / 1000) + 'km'], ['이번 달 수영', S2.month.n + '번'], ['총 거리', km1(S2.km) + 'km']].forEach(([k, v]) => { const c = al(sum, 'V', { gap: 2, align: 'CENTER', grow: true }); txt(c, v, 'H', C.ink); txt(c, k, 'CR', C.sub); });
+    // 최근 8주
+    const wc = al(b, 'V', { name: 'weekly', gap: 10, pad: [16, 16], fill: C.card, radius: 20, fillW: true });
+    const wh = al(wc, 'H', { justify: 'SPACE_BETWEEN', align: 'CENTER', fillW: true }); txt(wh, '최근 8주', 'BM', C.ink); txt(wh, S2.streak ? `${S2.streak}주 연속 기록 중` : '이번 주 첫 수영을 기다려요', 'CM', C.primary);
+    art(wc, weekChart(weeks), 318);
+    // 날짜별
+    txt(b, '날짜별 기록', 'CM', C.sub);
+    if (!list.length) {
+      const e = al(b, 'V', { gap: 6, pad: [22, 18], fill: C.card, radius: 20, align: 'CENTER', fillW: true });
+      art(e, A.seal, 64).classList.add('float');
+      txt(e, '아직 기록이 없어요', 'BM', C.ink); txt(e, '워치로 수영하고 진주를 받으면 여기에 쌓여요', 'CR', C.sub);
+      return s;
+    }
+    const box = al(b, 'V', { fill: C.card, radius: 20, fillW: true, pad: [4, 0], name: 'day-list' });
+    list.slice(0, 90).forEach((d, i) => {
+      const r = al(box, 'H', { gap: 12, pad: [12, 16], align: 'CENTER', fillW: true }); divider(r, i);
+      const ic = al(r, 'H', { fill: C.soft, radius: 12, w: 36, h: 36, align: 'CENTER', justify: 'CENTER' }); art(ic, P.icon.wave(), 18);
+      const col = al(r, 'V', { gap: 1, grow: true });
+      txt(col, `${d.date.getMonth() + 1}월 ${d.date.getDate()}일 ${WEEK[d.date.getDay()]}요일`, 'BM', C.ink);
+      txt(col, `${d.min}분${d.n > 1 ? ` · 수영 ${d.n}번` : ''}`, 'CR', C.sub, { size: 12 });
+      txt(r, `${d.m.toLocaleString()}m`, 'BM', C.primary);
+    });
+    if (list.length > 90) txt(b, '최근 90일까지 보여줘요', 'CR', C.mute);
+    return s;
+  };
+  // 주간 거리 막대 (최근 8주, 이번 주는 진하게)
+  function weekChart(weeks, w = 318) {
+    const H = 120, top = 18, base = 92, gap = 8, bw = (w - gap * (weeks.length + 1)) / weeks.length;
+    const max = Math.max(1000, ...weeks.map((x) => x.m));
+    let g = `<line x1="0" y1="${base}" x2="${w}" y2="${base}" stroke="#DCE2FF" stroke-width="1"/>`;
+    weeks.forEach((x, i) => {
+      const hgt = x.m ? Math.max(4, ((base - top) * x.m) / max) : 0, xx = gap + i * (bw + gap), last = i === weeks.length - 1;
+      if (hgt) g += `<rect x="${xx}" y="${base - hgt}" width="${bw}" height="${hgt}" rx="6" fill="${last ? '#456AFF' : '#9EB3FF'}"/>`;
+      if (x.m) g += `<text x="${xx + bw / 2}" y="${base - hgt - 5}" text-anchor="middle" font-size="10" font-weight="700" fill="${last ? '#1F8BFF' : '#5B7590'}">${(Math.round(x.m / 100) / 10).toFixed(1)}</text>`;
+      g += `<text x="${xx + bw / 2}" y="${base + 16}" text-anchor="middle" font-size="10" fill="${last ? '#0F2A43' : '#9DB2C7'}" font-weight="${last ? 700 : 500}">${last ? '이번 주' : x.label}</text>`;
+    });
+    return `<svg viewBox="0 0 ${w} ${H}" xmlns="http://www.w3.org/2000/svg" font-family="inherit" role="img" aria-label="최근 8주 주간 거리(km)">${g}</svg>`;
+  }
+
+  // ---------- 11 알림 설정 (앱 전용) ----------
+  S['11'] = (ctx) => {
+    const st = ctx.st, a = Object.assign({}, window.Notify ? window.Notify.DEFAULT : { on: false, days: [1, 3, 5], time: '06:30', evening: true }, st.alarm || {});
+    const s = screen('11');
+    const b = content(s, [6, 20, 34, 20], 14);
+    const hd = al(b, 'H', { gap: 8, align: 'CENTER', fillW: true }); iconBtn(hd, P.icon.back, 24, () => ctx.back(), '뒤로'); txt(hd, '알림 설정', 'T', C.ink);
+    txt(b, '수영 가는 날을 알려주고, 진주 받는 걸 잊지 않게 챙겨 줘요.\n알림은 이 폰에서 보내요.', 'CR', C.sub, { fillW: true });
+    const sw = (parent, on, fn, label) => { const t = al(parent, 'H', { pad: [3, 3], w: 48, h: 28, radius: 14, fill: on ? C.btn : '#D7DFEA', justify: on ? 'MAX' : 'MIN', align: 'CENTER', cls: 'switch' }); dot(t, 22, '#FFFFFF'); t.setAttribute('aria-checked', on ? 'true' : 'false'); tap(t, fn, label); return t; };
+    // 수영 알림
+    const c1 = al(b, 'V', { gap: 14, pad: [16, 16], fill: C.card, radius: 20, fillW: true, name: 'alarm-swim' });
+    const r1 = al(c1, 'H', { gap: 10, align: 'CENTER', fillW: true });
+    const t1 = al(r1, 'V', { gap: 2, grow: true }); txt(t1, '수영 알림', 'BM', C.ink); txt(t1, '고른 요일 · 시간에 "오늘은 수영 가는 날이에요"', 'CR', C.sub, { size: 12, fillW: true });
+    sw(r1, a.on, () => ctx.act('setAlarm', { on: !a.on }), '수영 알림 켜기');
+    const dim = a.on ? null : 0.45;
+    const days = al(c1, 'H', { gap: 6, fillW: true }); if (dim) days.style.opacity = dim;
+    [1, 2, 3, 4, 5, 6, 0].forEach((d) => {
+      const on = a.days.includes(d);
+      const c = al(days, 'H', { pad: [8, 0], radius: 12, fill: on ? C.navy : C.bg, stroke: on ? null : C.line, align: 'CENTER', justify: 'CENTER', grow: true });
+      txt(c, WEEK[d], 'CM', on ? '#FFFFFF' : d === 0 ? C.coral : C.sub);
+      tap(c, () => ctx.act('setAlarm', { days: on ? a.days.filter((x) => x !== d) : a.days.concat(d) }), `${WEEK[d]}요일`);
+    });
+    const tr = al(c1, 'H', { gap: 10, align: 'CENTER', fillW: true }); if (dim) tr.style.opacity = dim;
+    txt(tr, '알림 시간', 'CM', C.ink, { grow: true });
+    if (ctx.live) {
+      const inp = document.createElement('input'); inp.type = 'time'; inp.value = a.time; inp.className = 'tx ts-BM time-input'; inp.setAttribute('aria-label', '알림 시간');
+      inp.addEventListener('change', () => ctx.act('setAlarm', { time: inp.value || a.time }));
+      tr.appendChild(inp);
+    } else txt(tr, a.time, 'BM', C.ink);
+    // 진주 받기 알림
+    const c2 = al(b, 'H', { gap: 10, pad: [16, 16], fill: C.card, radius: 20, align: 'CENTER', fillW: true, name: 'alarm-evening' }); if (dim) c2.style.opacity = dim;
+    const t2 = al(c2, 'V', { gap: 2, grow: true }); txt(t2, '진주 받기 알림', 'BM', C.ink); txt(t2, '수영하는 날 밤 9시. 그날 진주를 받았으면 건너뛰어요', 'CR', C.sub, { size: 12, fillW: true });
+    sw(c2, a.on && a.evening, () => ctx.act('setAlarm', { evening: !a.evening, on: a.on || !a.evening }), '진주 받기 알림 켜기');
+    const note = al(b, 'V', { gap: 4, pad: [12, 14], fill: '#EEF3F9', radius: 14, fillW: true });
+    ['진주는 그날 앱에서 받은 기록만 돼요. 밤 알림이 잊지 않게 도와줘요.', '알림을 끄려면 여기서 끄거나, 휴대폰 설정 > 알림 > 우수꾸에서 꺼요.', '알림 내용에는 수영 기록이나 위치가 들어가지 않아요.'].forEach((l) => txt(note, '· ' + l, 'CR', C.sub, { fillW: true, size: 12 }));
     return s;
   };
 

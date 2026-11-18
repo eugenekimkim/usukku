@@ -60,6 +60,8 @@ body.app.native .name-input { -webkit-user-select: text; user-select: text; }
 .dex-art { width: 150px; margin: 4px 0 6px; }
 .pool-list .tx { overflow: hidden; text-overflow: ellipsis; }
 .pool-query::-webkit-search-cancel-button { -webkit-appearance: none; }
+.time-input { border: 0; outline: 0; background: #F3F9FF; border-radius: 12px; padding: 8px 12px; color: var(--ink); font: inherit; font-weight: 700; }
+.switch { cursor: pointer; transition: background .15s; }
 .legal-sheet { padding-bottom: 24px; }
 .legal-frame { width: 100%; height: 560px; border: 0; border-radius: 16px; background: #F3F9FF; }
 .note { width: 100%; background: var(--bg); border-radius: 16px; padding: 12px 14px; }
