@@ -9,7 +9,7 @@
 //  3. 행정안전부_생활_종합체육시설업 조회서비스 (공공데이터포털 15155071) — 같은 키. 종합체육시설업은 법상 실내 수영장을 갖춰야 해요
 //
 // 출력 형식: window.USUKKU_POOL_DATA = { updated, sources, pools: [[id, 이름, 위도, 경도, 동네, 주소], ...] }
-import { writeFileSync } from 'node:fs';
+import { writeFileSync, readFileSync, existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import proj4 from 'proj4';
@@ -20,7 +20,7 @@ const SAMPLE = join(root, 'scripts', 'pools-sample.json'); // 출처별 원본 �
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 // ---------- 1. OpenStreetMap ----------
-const OVERPASS = ['https://overpass-api.de/api/interpreter', 'https://overpass.kumi.systems/api/interpreter'];
+const OVERPASS = ['https://overpass-api.de/api/interpreter', 'https://overpass.kumi.systems/api/interpreter', 'https://overpass.private.coffee/api/interpreter', 'https://maps.mail.ru/osm/tools/overpass/api/interpreter'];
 const QUERY = `[out:json][timeout:240];
 area["ISO3166-1"="KR"][admin_level=2]->.kr;
 (
@@ -62,7 +62,17 @@ async function fromOsm() {
       await sleep(5000);
     }
   }
-  return { pools: [], sample: [] };
+  // 모든 서버가 응답하지 않으면 지난번 목록의 OSM 항목을 그대로 써요
+  const prev = previousOsm();
+  console.warn(`OSM 서버가 모두 실패 → 지난 목록의 OSM ${prev.length}개를 그대로 써요`);
+  return { pools: prev, sample: [], stale: true };
+}
+function previousOsm() {
+  try {
+    if (!existsSync(OUT)) return [];
+    const m = /window\.USUKKU_POOL_DATA = (\{.*\});/s.exec(readFileSync(OUT, 'utf8'));
+    return m ? JSON.parse(m[1]).pools.filter((p) => String(p[0]).startsWith('osm:')).map(([id, name, lat, lng, dong, addr]) => ({ id, name, lat, lng, dong, addr, src: 'osm' })) : [];
+  } catch (e) { return []; }
 }
 
 // ---------- 2. 공공데이터포털: 행정안전부_생활_수영장업 ----------
