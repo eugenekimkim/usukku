@@ -30,6 +30,10 @@ area["ISO3166-1"="KR"][admin_level=2]->.kr;
 out center tags;`;
 const NAME_OK = /수영|아쿠아|aqua|swim|풀|체육센터|스포츠센터|체육관|레포츠|스포츠타운|생활체육/i;
 const NAME_BAD = /유아|어린이풀|키즈|호텔|리조트|펜션|빌라|아파트|캠핑|글램핑|워터파크|물놀이/i;
+// 어른이 다니기 어려운 아동 전용 수영장(키즈풀 · 아기 수영)은 빼요
+const KIDS = /키즈|kids|kid's|어린이|유아|베이비|baby|아기|키드|토들러|꼬마|리틀/i;
+// 사업장명 앞뒤의 회사 표기 정리: '주식회사 OO', '(주)OO', 'OO(주)'
+const cleanName = (n) => n.replace(/^\s*(주식회사|㈜|\(주\)|유한회사|\(유\))\s*/, '').replace(/\s*(주식회사|㈜|\(주\))\s*$/, '').replace(/\s{2,}/g, ' ').trim();
 
 async function fromOsm() {
   for (const url of OVERPASS) {
@@ -40,7 +44,8 @@ async function fromOsm() {
       const out = [];
       for (const e of json.elements || []) {
         const t = e.tags || {};
-        const name = (t['name:ko'] || t.name || '').trim();
+        const name = cleanName((t['name:ko'] || t.name || '').trim());
+        if (KIDS.test(name)) continue;
         const lat = e.lat ?? e.center?.lat, lng = e.lon ?? e.center?.lon;
         if (!name || lat == null) continue;
         if (t.access && /private|no|customers/.test(t.access)) continue;
@@ -75,7 +80,7 @@ const F = {
 };
 async function fromDataGoKr(key) {
   if (!key) { console.log('DATA_GO_KR_KEY 없음 → 공공데이터포털 수영장업은 건너뛰어요'); return { pools: [], sample: [] }; }
-  const out = [], sample = [];
+  const out = [], sample = [], stats = { total: 0, closed: 0, kids: 0, noCoord: 0 };
   // 포털에는 기본 주소만 있어서, 첫 쪽에서 실제 경로를 찾아요
   const BASE = 'https://apis.data.go.kr/1741000/swimming_pools';
   let path = null;
@@ -101,20 +106,24 @@ async function fromDataGoKr(key) {
     if (page === 1) sample.push(trimSample(json));
     if (!items.length) break;
     for (const it of items) {
+      stats.total++;
       const status = pick(it, F.status);
-      if (status && !/영업|정상|^0?1$/.test(status)) continue; // 폐업 · 휴업 제외
+      if (status && !/영업|정상|^0?1$/.test(status)) { stats.closed++; continue; } // 폐업 · 휴업 제외
+      const name = cleanName(pick(it, F.name));
+      if (!name || KIDS.test(name)) { stats.kids++; continue; }
       const x = parseFloat(pick(it, F.x)), y = parseFloat(pick(it, F.y));
-      if (!isFinite(x) || !isFinite(y)) continue;
+      if (!isFinite(x) || !isFinite(y)) { stats.noCoord++; continue; }
       const [lng, lat] = proj4('EPSG:5174', 'WGS84', [x, y]);
       if (!(lat > 33 && lat < 39 && lng > 124 && lng < 132)) continue;
       const lot = pick(it, F.lot), road = pick(it, F.road);
       const dong = (/\s([가-힣0-9]+[동읍면리가])(\s|$)/.exec(lot) || [])[1] || '';
-      out.push({ id: `go:${pick(it, F.id) || `${x},${y}`}`, name: pick(it, F.name), lat, lng, dong, addr: road || lot, src: 'go' });
+      out.push({ id: `go:${pick(it, F.id) || `${x},${y}`}`, name, lat, lng, dong, addr: road || lot, src: 'go' });
     }
     if (items.length < 100) break;
     await sleep(200);
   }
-  console.log(`공공데이터포털 수영장업: ${out.length}개`);
+  console.log(`공공데이터포털 수영장업: 받은 ${stats.total}개 → 폐업 · 휴업 ${stats.closed}, 아동 전용 ${stats.kids}, 좌표 없음 ${stats.noCoord} 빼고 ${out.length}개`);
+  noCoordCount = stats.noCoord;
   return { pools: out, sample };
 }
 function findItems(o) {
@@ -139,6 +148,7 @@ function merge(lists) {
   return out.sort((a, b) => a.lat - b.lat || a.lng - b.lng);
 }
 
+let noCoordCount = 0;
 const [osm, go] = await Promise.all([fromOsm(), fromDataGoKr(process.env.DATA_GO_KR_KEY)]);
 const pools = merge([go.pools, osm.pools]);
 if (pools.length < 50) { console.error(`수영장이 ${pools.length}개뿐이라 파일을 바꾸지 않아요`); process.exit(1); }
@@ -146,7 +156,7 @@ const r5 = (n) => Math.round(n * 1e5) / 1e5;
 const data = {
   updated: new Date().toISOString().slice(0, 10),
   sources: [osm.pools.length && '© OpenStreetMap 기여자 (ODbL)', go.pools.length && '행정안전부 생활_수영장업 (공공데이터포털)'].filter(Boolean),
-  counts: { osm: osm.pools.length, go: go.pools.length, merged: pools.length },
+  counts: { osm: osm.pools.length, go: go.pools.length, merged: pools.length, goNoCoord: noCoordCount },
   pools: pools.map((p) => [p.id, p.name, r5(p.lat), r5(p.lng), p.dong, p.addr]),
 };
 writeFileSync(OUT, `// 자동 생성 파일 — scripts/build-pools.mjs (직접 고치지 마세요)\n// OpenStreetMap에서 온 항목: © OpenStreetMap 기여자, ODbL 1.0 (https://www.openstreetmap.org/copyright) · 이 목록도 ODbL로 제공해요\nwindow.USUKKU_POOL_DATA = ${JSON.stringify(data)};\n`);
