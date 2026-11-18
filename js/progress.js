@@ -65,6 +65,20 @@
   }
   const earnedRewards = (history, now = new Date()) => { const s = stats(history, now); return Object.keys(REWARDS).filter((k) => REWARDS[k].earned(s)); };
 
+  // 수영 기록 화면: 날짜별 목록(최근 순)과 최근 n주 주간 거리
+  const dayList = (history) => days(history).sort((a, b) => (a[0] < b[0] ? 1 : -1)).map(([k, v]) => ({ day: k, date: parseDay(k), m: v.m, min: v.min, n: v.n }));
+  function weeklySeries(history, now = new Date(), n = 8) {
+    const out = [];
+    const start = weekStart(now); start.setDate(start.getDate() - 7 * (n - 1));
+    for (let i = 0; i < n; i++) {
+      const w = new Date(start); w.setDate(start.getDate() + 7 * i);
+      out.push({ key: dayKey(w), label: `${w.getMonth() + 1}/${w.getDate()}`, m: 0, n: 0 });
+    }
+    const idx = new Map(out.map((w, i) => [w.key, i]));
+    days(history).forEach(([k, v]) => { const i = idx.get(weekKey(parseDay(k))); if (i != null) { out[i].m += v.m; out[i].n += v.n; } });
+    return out;
+  }
+
   // 진주를 받은 기록을 그날에 더해요
   function addDay(history, day, add) {
     const h = Object.assign({}, history);
@@ -85,6 +99,6 @@
 
   root.PROGRESS = {
     ISLAND_KM, ISLAND_PEARLS, GRADUATE_KM, LAP_GOAL, REWARDS,
-    dayKey, weekKey, totalKm, swimDays, myRoute, reached, weekSwims, streakWeeks, monthStats, stats, earnedRewards, addDay, demoHistory,
+    dayKey, weekKey, dayList, weeklySeries, totalKm, swimDays, myRoute, reached, weekSwims, streakWeeks, monthStats, stats, earnedRewards, addDay, demoHistory,
   };
 })(typeof window !== 'undefined' ? window : globalThis);

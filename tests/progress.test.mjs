@@ -56,3 +56,14 @@ test('브라우저 데모 기록: 오늘 전까지만, 월 · 수 · 금', () =>
   assert.ok(!h['2026-11-18']); assert.ok(h['2026-11-16']); assert.ok(!h['2026-11-17']);
   assert.equal(P.streakWeeks(h, NOW), 4);
 });
+
+test('수영 기록 화면: 최근 순 목록 · 최근 8주 주간 거리', () => {
+  const h = Object.fromEntries([day(2026, 11, 17, 1250), day(2026, 11, 16, 800), day(2026, 11, 3, 1500), day(2026, 9, 1, 900)]);
+  const list = P.dayList(h);
+  assert.deepEqual(J(list.map((d) => d.day)), ['2026-11-17', '2026-11-16', '2026-11-03', '2026-09-01']);
+  const w = P.weeklySeries(h, NOW, 8);
+  assert.equal(w.length, 8);
+  assert.equal(w[7].label, '11/16'); assert.equal(w[7].m, 2050); assert.equal(w[7].n, 2);
+  assert.equal(w[5].m, 1500); // 11/2 주
+  assert.equal(w.reduce((t, x) => t + x.m, 0), 3550); // 9월 1일은 8주 밖
+});
