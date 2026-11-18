@@ -1,48 +1,5 @@
 {
-  "osm": [
-    {
-      "type": "node",
-      "id": 368859501,
-      "lat": 37.490184,
-      "lon": 129.108874,
-      "tags": {
-        "leisure": "swimming_pool",
-        "name": "그린옥사우나",
-        "name:en": "Green Ok Sauna",
-        "name:ko": "그린옥사우나",
-        "name:ko-Latn": "Geurinoksauna",
-        "sport": "swimming"
-      }
-    },
-    {
-      "type": "node",
-      "id": 368866873,
-      "lat": 37.520554,
-      "lon": 126.872355,
-      "tags": {
-        "leisure": "sports_centre",
-        "name": "미진수영장",
-        "name:en": "Mijin Swimming Pool",
-        "name:ko": "미진수영장",
-        "name:ko-Latn": "Mijinsuyeongjang",
-        "sport": "swimming"
-      }
-    },
-    {
-      "type": "node",
-      "id": 368866881,
-      "lat": 37.5562833,
-      "lon": 127.0017918,
-      "tags": {
-        "leisure": "sports_centre",
-        "name": "장충수영장",
-        "name:en": "Jangchung Swimming Pool",
-        "name:ko": "장충수영장",
-        "name:ko-Latn": "Jangchungsuyeongjang",
-        "sport": "swimming"
-      }
-    }
-  ],
+  "osm": [],
   "go": [
     {
       "keys": [
@@ -108,6 +65,61 @@
         "TCBIZ_BGNG_YMD": "",
         "TCBIZ_END_YMD": "",
         "TELNO": ""
+      },
+      "top": [
+        "response"
+      ]
+    }
+  ],
+  "comp": [
+    {
+      "keys": [
+        "BPLC_NM",
+        "CLSBIZ_YMD",
+        "CRD_INFO_X",
+        "CRD_INFO_Y",
+        "DAT_UPDT_PNT",
+        "DAT_UPDT_SE",
+        "DTL_SALS_STTS_CD",
+        "DTL_SALS_STTS_NM",
+        "LAST_MDFCN_PNT",
+        "LCPMT_RTRCN_YMD",
+        "LCPMT_YMD",
+        "LCTN_ZIP",
+        "LOTNO_ADDR",
+        "MNG_NO",
+        "OPN_ATMY_GRP_CD",
+        "ROAD_NM_ADDR",
+        "ROAD_NM_ZIP",
+        "SALS_STTS_CD",
+        "SALS_STTS_NM",
+        "TCBIZ_BGNG_YMD",
+        "TCBIZ_END_YMD",
+        "TELNO"
+      ],
+      "first": {
+        "BPLC_NM": "금산 반다비 체육센터",
+        "CLSBIZ_YMD": "",
+        "CRD_INFO_X": "242809.614181513",
+        "CRD_INFO_Y": "289152.203779287",
+        "DAT_UPDT_PNT": "2026-10-27 22:56:45",
+        "DAT_UPDT_SE": "I",
+        "DTL_SALS_STTS_CD": "13",
+        "DTL_SALS_STTS_NM": "영업중",
+        "LAST_MDFCN_PNT": "2026-10-26 22:16:29",
+        "LCPMT_RTRCN_YMD": "",
+        "LCPMT_YMD": "2026-10-26",
+        "LCTN_ZIP": "",
+        "LOTNO_ADDR": "충청남도 금산군 금산읍 상옥리 409",
+        "MNG_NO": "CDFH3301262026000001",
+        "OPN_ATMY_GRP_CD": "4550000",
+        "ROAD_NM_ADDR": "충청남도 금산군 금산읍 장동길 197",
+        "ROAD_NM_ZIP": "32745",
+        "SALS_STTS_CD": "01",
+        "SALS_STTS_NM": "영업/정상",
+        "TCBIZ_BGNG_YMD": "",
+        "TCBIZ_END_YMD": "",
+        "TELNO": "041-750-2252"
       },
       "top": [
         "response"
