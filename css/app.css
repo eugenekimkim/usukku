@@ -58,6 +58,8 @@ body.app.native .name-input { -webkit-user-select: text; user-select: text; }
 .sbtn.primary { background: var(--btn); color: #fff; }
 .sbtn:focus-visible { outline: 3px solid var(--navy); outline-offset: 2px; }
 .dex-art { width: 150px; margin: 4px 0 6px; }
+.pool-list .tx { overflow: hidden; text-overflow: ellipsis; }
+.pool-query::-webkit-search-cancel-button { -webkit-appearance: none; }
 .legal-sheet { padding-bottom: 24px; }
 .legal-frame { width: 100%; height: 560px; border: 0; border-radius: 16px; background: #F3F9FF; }
 .note { width: 100%; background: var(--bg); border-radius: 16px; padding: 12px 14px; }
