@@ -6,6 +6,7 @@
 // 출처
 //  1. OpenStreetMap (Overpass API) — 키 없음. 구민 · 국민체육센터 같은 공공 수영장을 포함해요. © OpenStreetMap 기여자, ODbL
 //  2. 행정안전부_생활_수영장업 조회서비스 (공공데이터포털 15155038) — 환경변수 DATA_GO_KR_KEY가 있을 때만. 영업 중인 수영장업
+//  3. 행정안전부_생활_종합체육시설업 조회서비스 (공공데이터포털 15155071) — 같은 키. 종합체육시설업은 법상 실내 수영장을 갖춰야 해요
 //
 // 출력 형식: window.USUKKU_POOL_DATA = { updated, sources, pools: [[id, 이름, 위도, 경도, 동네, 주소], ...] }
 import { writeFileSync } from 'node:fs';
@@ -78,21 +79,21 @@ const F = {
   y: ['CRD_INFO_Y', 'crdInfoY', 'Y', 'y', '좌표정보Y'],
   id: ['MNG_NO', 'mngNo', 'MGTNO', '관리번호'],
 };
-async function fromDataGoKr(key) {
-  if (!key) { console.log('DATA_GO_KR_KEY 없음 → 공공데이터포털 수영장업은 건너뛰어요'); return { pools: [], sample: [] }; }
+async function fromDataGoKr(key, { base, label, prefix }) {
+  if (!key) { console.log(`DATA_GO_KR_KEY 없음 → 공공데이터포털 ${label}은 건너뛰어요`); return { pools: [], sample: [] }; }
   const out = [], sample = [], stats = { total: 0, closed: 0, kids: 0, noCoord: 0 };
   // 포털에는 기본 주소만 있어서, 첫 쪽에서 실제 경로를 찾아요
-  const BASE = 'https://apis.data.go.kr/1741000/swimming_pools';
+  const BASE = base;
   let path = null;
   for (const cand of ['', '/info', '/getInfo', '/list']) {
     try {
       const res = await fetch(`${BASE}${cand}?serviceKey=${encodeURIComponent(key)}&pageNo=1&numOfRows=1&returnType=json`);
       const body = await res.text();
-      console.log(`수영장업 경로 '${cand || '/'}': HTTP ${res.status} ${body.slice(0, 160).replace(/\s+/g, ' ')}`);
+      console.log(`${label} 경로 '${cand || '/'}': HTTP ${res.status} ${body.slice(0, 160).replace(/\s+/g, ' ')}`);
       if (res.ok && findItems(JSON.parse(body)).length) { path = cand; break; }
-    } catch (e) { console.warn(`수영장업 경로 '${cand}' 실패: ${e.message}`); }
+    } catch (e) { console.warn(`${label} 경로 '${cand}' 실패: ${e.message}`); }
   }
-  if (path == null) { console.warn('수영장업 API 경로를 찾지 못했어요 (위 응답을 확인해 주세요)'); return { pools: [], sample }; }
+  if (path == null) { console.warn(`${label} API 경로를 찾지 못했어요 (위 응답을 확인해 주세요)`); return { pools: [], sample }; }
   for (let page = 1; page <= 200; page++) {
     const url = `${BASE}${path}?serviceKey=${encodeURIComponent(key)}&pageNo=${page}&numOfRows=100&returnType=json`;
     let json;
@@ -100,7 +101,7 @@ async function fromDataGoKr(key) {
       const res = await fetch(url);
       if (!res.ok) throw new Error('HTTP ' + res.status);
       json = await res.json();
-    } catch (e) { console.warn(`수영장업 ${page}쪽 실패: ${e.message}`); break; }
+    } catch (e) { console.warn(`${label} ${page}쪽 실패: ${e.message}`); break; }
     // 응답 모양도 문서에 없어서, 객체 배열을 찾아 내려가요
     const items = findItems(json);
     if (page === 1) sample.push(trimSample(json));
@@ -117,13 +118,13 @@ async function fromDataGoKr(key) {
       if (!(lat > 33 && lat < 39 && lng > 124 && lng < 132)) continue;
       const lot = pick(it, F.lot), road = pick(it, F.road);
       const dong = (/\s([가-힣0-9]+[동읍면리가])(\s|$)/.exec(lot) || [])[1] || '';
-      out.push({ id: `go:${pick(it, F.id) || `${x},${y}`}`, name, lat, lng, dong, addr: road || lot, src: 'go' });
+      out.push({ id: `${prefix}:${pick(it, F.id) || `${x},${y}`}`, name, lat, lng, dong, addr: road || lot, src: prefix });
     }
     if (items.length < 100) break;
     await sleep(200);
   }
-  console.log(`공공데이터포털 수영장업: 받은 ${stats.total}개 → 폐업 · 휴업 ${stats.closed}, 아동 전용 ${stats.kids}, 좌표 없음 ${stats.noCoord} 빼고 ${out.length}개`);
-  noCoordCount = stats.noCoord;
+  console.log(`공공데이터포털 ${label}: 받은 ${stats.total}개 → 폐업 · 휴업 ${stats.closed}, 아동 전용 ${stats.kids}, 좌표 없음 ${stats.noCoord} 빼고 ${out.length}개`);
+  noCoordCount += stats.noCoord;
   return { pools: out, sample };
 }
 function findItems(o) {
@@ -149,16 +150,21 @@ function merge(lists) {
 }
 
 let noCoordCount = 0;
-const [osm, go] = await Promise.all([fromOsm(), fromDataGoKr(process.env.DATA_GO_KR_KEY)]);
-const pools = merge([go.pools, osm.pools]);
+const KEY = process.env.DATA_GO_KR_KEY;
+const [osm, go, comp] = await Promise.all([
+  fromOsm(),
+  fromDataGoKr(KEY, { base: 'https://apis.data.go.kr/1741000/swimming_pools', label: '수영장업', prefix: 'go' }),
+  fromDataGoKr(KEY, { base: 'https://apis.data.go.kr/1741000/comprehensive_sports_facilities', label: '종합체육시설업', prefix: 'gc' }),
+]);
+const pools = merge([go.pools, comp.pools, osm.pools]);
 if (pools.length < 50) { console.error(`수영장이 ${pools.length}개뿐이라 파일을 바꾸지 않아요`); process.exit(1); }
 const r5 = (n) => Math.round(n * 1e5) / 1e5;
 const data = {
   updated: new Date().toISOString().slice(0, 10),
-  sources: [osm.pools.length && '© OpenStreetMap 기여자 (ODbL)', go.pools.length && '행정안전부 생활_수영장업 (공공데이터포털)'].filter(Boolean),
-  counts: { osm: osm.pools.length, go: go.pools.length, merged: pools.length, goNoCoord: noCoordCount },
+  sources: [osm.pools.length && '© OpenStreetMap 기여자 (ODbL)', go.pools.length && '행정안전부 생활_수영장업', comp.pools.length && '행정안전부 생활_종합체육시설업'].filter(Boolean),
+  counts: { osm: osm.pools.length, go: go.pools.length, comp: comp.pools.length, merged: pools.length, noCoord: noCoordCount },
   pools: pools.map((p) => [p.id, p.name, r5(p.lat), r5(p.lng), p.dong, p.addr]),
 };
 writeFileSync(OUT, `// 자동 생성 파일 — scripts/build-pools.mjs (직접 고치지 마세요)\n// OpenStreetMap에서 온 항목: © OpenStreetMap 기여자, ODbL 1.0 (https://www.openstreetmap.org/copyright) · 이 목록도 ODbL로 제공해요\nwindow.USUKKU_POOL_DATA = ${JSON.stringify(data)};\n`);
-writeFileSync(SAMPLE, JSON.stringify({ osm: osm.sample, go: go.sample }, null, 2));
-console.log(`js/pools-data.js: ${pools.length}개 (OSM ${osm.pools.length}, 수영장업 ${go.pools.length})`);
+writeFileSync(SAMPLE, JSON.stringify({ osm: osm.sample, go: go.sample, comp: comp.sample }, null, 2));
+console.log(`js/pools-data.js: ${pools.length}개 (OSM ${osm.pools.length}, 수영장업 ${go.pools.length}, 종합체육시설업 ${comp.pools.length})`);
