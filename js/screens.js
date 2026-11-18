@@ -136,6 +136,7 @@
   function curPool(ctx) {
     const st = ctx.st, m = ctx.live && st.myPool;
     if (m) return { id: m.id, name: m.name, dong: m.dong || '', lane: m.lane || 25, meta: `${m.lane || 25}m 레인`, members: null, real: true };
+    if (realPools(ctx)) return { id: null, name: '내 수영장을 골라주세요', dong: '', lane: 25, meta: '25m 레인', members: null, real: true };
     const p = POOLS[st.pool] || POOLS[0];
     return { id: st.pool, name: p[0], dong: p[3], lane: +((/(\d+)m/.exec(p[1]) || [0, 25])[1]), meta: p[1].split(' · ')[1], members: p[2], real: false };
   }
